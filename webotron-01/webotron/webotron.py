@@ -14,6 +14,7 @@ def get_resource(rname):
     """ get resource by input resource name """
     return get_boto3_session().resource(rname)
 
+
 def get_client(cname):
     """ get client by input client name """
     return get_boto3_session().client(cname)
@@ -43,14 +44,14 @@ def init(pname='python_automation'):
     """ initialize webotron script """
     global g_boto3_session
     g_boto3_session = boto3.Session(profile_name=pname)
-    
+
 
 def get_s3_buckets():
-   return get_s3_resource().buckets.all()
+    return get_s3_resource().buckets.all()
 
 
 def get_s3_bucket(name):
-   return get_s3_resource().Bucket(name)
+    return get_s3_resource().Bucket(name)
 
 
 @click.group()

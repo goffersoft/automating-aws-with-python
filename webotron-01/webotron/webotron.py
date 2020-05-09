@@ -3,43 +3,53 @@ from boto3_s3_helper import *
 
 
 @click.group()
-def cli():
-    """ cli (base) group -- entry point """
+@click.option('--profile', default='python_automation',
+              help='profile name to use while initializing the boto3 package')
+@click.option('--region', default=None,
+              help='overide the region name in the aws profile')
+def cli(profile, region):
+    """ Webotron - AWS Automation Tool """
 
-    init()
+    init(profile, region)
 
 
 @cli.group()
 def s3():
-    """ s3 group -- cli-->s3 """
+    """ - AWS S3 Automation Commands """
 
     pass
 
 
 @s3.command('list-buckets')
 def list_s3_buckets():
-    """ List all S3 Buckets """
+    """ List all S3 buckets """
 
     for bucket in get_s3_bucket_resources():
         print(bucket)
 
 
 @s3.command('list-bucket-objects')
-@click.argument('name')
+@click.argument('name', default=None)
 def list_s3_bucket_objects(name):
-    """ List all s3 bucket objects """
+    """ List all S3 bucket objects associated with bucker name """
 
     for obj in get_s3_bucket_resource(name).objects.all():
         print(obj)
 
 
 @s3.command('setup-bucket')
-@click.argument('name')
-@click.argument('policy_file', default='templates/policy/allow_all.json')
-@click.argument('index_file', default='templates/www/index.html')
-@click.argument('index_name', default='index.html')
-@click.argument('error_file', default='templates/www/error.html')
-@click.argument('error_name', default='error.html')
+@click.argument('name', default=None)
+@click.option('--policy-file', default='templates/policy/allow_all.json',
+              help='policy filename(contains a json document)\
+                    or a json policy string')
+@click.option('--index_file', default='templates/www/index.html',
+              help='filename(contains a html document) or a html string')
+@click.option('--index_name', default='index.html',
+              help='name to use for the index s3 object')
+@click.option('--error_file', default='templates/www/error.html',
+              help='filename(contains a html document) or a html string')
+@click.option('--error_name', default='error.html',
+              help='name to use for the error s3 object')
 def s3_bucket_setup(name, policy_file, index_file,
                     index_name, error_file, error_name):
     """ setup a bucket for web hosting

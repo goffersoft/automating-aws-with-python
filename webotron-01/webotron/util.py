@@ -69,15 +69,15 @@ def is_valid_html(html, type=None, estr=None):
     """ validates the filename or a string passed in as html """
 
     try:
-        if (type is None or type == 'file'):
+        if type is None or type == 'file':
             ok, err = is_valid_html_file(html)
         else:
             ok, err = is_valid_html_string(html)
 
         if ok:
-            return True, 'file' if type is None else 'str', None
+            return True, 'file' if type is None else type, None
 
-        if (estr is None):
+        if estr is None:
             return False, None, f'Invalid Json String: {err}'
         else:
             return False, None,\
@@ -96,7 +96,7 @@ def is_valid_json(json, type=None, estr=None):
             ok, err = is_valid_json_string(json)
 
         if ok:
-            return True, 'file' if type is None else 'str', None
+            return True, 'file' if type is None else type, None
 
         if estr is None:
             return False, None, 'Invalid Json String:' + err

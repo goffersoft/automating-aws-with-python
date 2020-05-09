@@ -12,7 +12,7 @@ Webotron has the following features
     - list bucket objects
     - setup bucket
         ```
-        setup a buket for web hosting
+        setup a bucket for web hosting
         1) create a bucket using the (required) bucket name
            and policy as a json string or file 
            default policy used if none provided

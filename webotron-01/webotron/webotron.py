@@ -2,7 +2,7 @@ import boto3
 from botocore.exceptions import ClientError
 import sys
 import click
-import json 
+import json
 from json.decoder import JSONDecodeError
 import html5lib
 from html5lib.html5parser import ParseError
@@ -107,12 +107,12 @@ def s3_bucket_enable_webhosting(bucket_res, index_name, error_name):
     try:
         web = get_s3_bucket_website_resource(bucket_res)
 
-        web.put(WebsiteConfiguration=\
-                 {'IndexDocument': { 'Suffix': index_name },\
-                  'ErrorDocument': { 'Key': error_name }, })
+        web.put(WebsiteConfiguration={
+                'IndexDocument': {'Suffix': index_name},
+                'ErrorDocument': {'Key': error_name}, })
 
         return True, None
-    except ClientError as e: 
+    except ClientError as e:
         return False, str(e)
 
 
@@ -122,18 +122,21 @@ def s3_bucket_cleanup(bucket_res):
 
 def create_s3_bucket_policy(bucket_res, policy, validate=True):
     """ create/associate a policy with this 33 bucket """
-     
+
     if validate:
-        policy, err = validate_and_get_s3_bucket_policy_as_string(bucket_res.name, policy)
-        
+        policy, err =\
+            validate_and_get_s3_bucket_policy_as_string(
+                bucket_res.name, policy)
+
         if err is not None:
             return False, err
 
     try:
         get_s3_bucket_policy_resource(bucket_res).put(Policy=policy)
-        return True, None;
+        return True, None
     except ClientError as e:
         return False, str(e)
+
 
 def validate_and_get_s3_bucket_policy_as_string(bucket_name, bucket_policy):
     """ validates the s3 bucket policy (file or a string)
@@ -154,7 +157,7 @@ def validate_and_get_s3_bucket_policy_as_string(bucket_name, bucket_policy):
 
 
 def get_s3_bucket_url(bucket_name):
-    return g_s3_bucket_url %(bucket_name, get_session().region_name)
+    return g_s3_bucket_url % (bucket_name, get_session().region_name)
 
 
 def create_s3_bucket(name, policy):
@@ -164,7 +167,7 @@ def create_s3_bucket(name, policy):
 
     try:
         policy, err = \
-               validate_and_get_s3_bucket_policy_as_string(name, policy)
+            validate_and_get_s3_bucket_policy_as_string(name, policy)
 
         if err is not None:
             return None, err
@@ -172,21 +175,22 @@ def create_s3_bucket(name, policy):
         if default_region():
             bucket = get_s3_resource().create_bucket(Bucket=name)
         else:
-            bucket = get_s3_resource().\
-                      create_bucket(Bucket=name,
-                           CreateBucketConfiguration=\
-                    {'LocationConstraint' : get_session().region_name})
+            bucket = get_s3_resource()\
+                .create_bucket(Bucket=name,
+                               CreateBucketConfiguration={
+                                   'LocationConstraint':
+                                   get_session().region_name})
 
         ok, err = create_s3_bucket_policy(bucket, policy, False)
 
         if not ok:
             return None, f'Fatal : Cannot Create Bucket Policy : {err}'
-            
+
     except ClientError as e:
         if getClientErrorCode(e) == 'BucketAlreadyOwnedByYou':
             bucket = get_s3_bucket_resource(name)
         else:
-            return None, str(e) 
+            return None, str(e)
 
     return bucket, None
 
@@ -201,12 +205,12 @@ def create_s3_bucket_object_html(bucket_res, html, filename):
 
     try:
         if type == 'str':
-            get_s3_resource().Object(bucket_res.name, filename).\
-                                 put(Body=bytes(html),
-                                     ContentType='text/html')
+            get_s3_resource().Object(bucket_res.name, filename)\
+                             .put(Body=bytes(html),
+                                  ontentType='text/html')
         else:
             bucket_res.upload_file(html, filename,
-                              ExtraArgs={'ContentType' : 'text/html'})
+                                   ExtraArgs={'ContentType': 'text/html'})
     except ClientError as e:
         return False, str(e)
 
@@ -215,19 +219,19 @@ def create_s3_bucket_object_html(bucket_res, html, filename):
 
 def get_file_as_string(filename):
     """  get the contents of a file as a string.
-         raises the FileNotFoundException 
+         raises the FileNotFoundException
     """
 
     try:
         with open(filename) as file:
             return file.read(), None
     except FileNotFoundError as e:
-        return None, str(e) 
+        return None, str(e)
 
 
 def is_valid_html_file(html_file):
-    """  validates the contents of the file as html 
-         raises the FileNotFoundException 
+    """  validates the contents of the file as html
+         raises the FileNotFoundException
     """
     with open(html_file) as file:
         try:
@@ -253,7 +257,7 @@ def is_valid_html_string(html_string):
 
 def is_valid_json_file(json_file):
     """  validates the contents of the file as json
-         raises the FileNotFoundException 
+         raises the FileNotFoundException
     """
 
     with open(json_file) as file:
@@ -278,7 +282,7 @@ def is_valid_html(html, type=None, estr=None):
     """ validates the filename or a string passed in as html """
 
     try:
-        if (type == None or type == 'file'):
+        if (type is None or type == 'file'):
             ok, err = is_valid_html_file(html)
         else:
             ok, err = is_valid_html_string(html)
@@ -286,11 +290,11 @@ def is_valid_html(html, type=None, estr=None):
         if ok:
             return True, 'file' if type is None else 'str', None
 
-        if (estr == None):
+        if (estr is None):
             return False, None, f'Invalid Json String: {err}'
         else:
             return False, None,\
-                    f'Invalid file name or html string: str([{estr}, {err}])'
+                f'Invalid file name or html string: str([{estr}, {err}])'
     except FileNotFoundError as e:
         return is_valid_html(html, 'str', str(e))
 
@@ -299,19 +303,19 @@ def is_valid_json(json, type=None, estr=None):
     """ validates the filename or a string passed in as json """
 
     try:
-        if (type == None or type == 'file'):
+        if type is None or type == 'file':
             ok, err = is_valid_json_file(json)
         else:
             ok, err = is_valid_json_string(json)
-        
-        if ok: 
+
+        if ok:
             return True, 'file' if type is None else 'str', None
 
-        if (estr == None):
+        if estr is None:
             return False, None, 'Invalid Json String:' + err
         else:
             return False, None,\
-                    f'Invalid file name or json string: str([{estr}, {err}])'
+                f'Invalid file name or json string: str([{estr}, {err}])'
     except FileNotFoundError as e:
         return is_valid_json(json, 'str', str(e))
 
@@ -367,9 +371,9 @@ def list_s3_bucket_objects(name):
 @click.argument('error_name', default='error.html')
 def s3_bucket_setup(name, policy_file, index_file,
                     index_name, error_file, error_name):
-    """ setup a buket for web hosting
+    """ setup a bucket for web hosting
         1) create a bucket using the (required) bucket name
-           and policy as a json string or file 
+           and policy as a json string or file
            default policy used if none provided
         2) add 2 html object to the bucket - index.html / error.html
            defaults used if none is provided
@@ -381,19 +385,19 @@ def s3_bucket_setup(name, policy_file, index_file,
         print(f'Cannot create bucket {name}: {err}')
         s3_bucket_cleanup(bucket_res)
         return
-    
+
     ok, err = create_s3_bucket_object_html(bucket_res, index_file, index_name)
     if not ok:
         print(f'Cannot create bucket object {index} : {err}')
         s3_bucket_cleanup(bucket_res)
         return
 
-    ok, err = create_s3_bucket_object_html(bucket_res, error_file, error_name) 
+    ok, err = create_s3_bucket_object_html(bucket_res, error_file, error_name)
     if not ok:
         print(f'Cannot create bucket {error} : {err}')
         s3_bucket_cleanup(bucket_res)
         return
-     
+
     ok, err = s3_bucket_enable_webhosting(bucket_res, index_name, error_name)
     if not ok:
         print(f'Cannot enable web hosting on bucket : {name} : {err}')

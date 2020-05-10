@@ -11,7 +11,6 @@ Webotron has the following features
     - list buckets
     - list bucket objects
     - setup bucket
-        ```
         setup a bucket for web hosting
         1) create a bucket using the (required) bucket name
            and policy as a json string or file 
@@ -19,5 +18,5 @@ Webotron has the following features
         2) add 2 html object to the bucket - index.html / error.html
            defaults used if none is provided
         3) enable web hosting on this bucket
-        ```
+    - sync web directory from filesystem with a s3 bucket 
         

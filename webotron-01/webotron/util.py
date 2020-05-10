@@ -1,7 +1,9 @@
 import json
 import html5lib
+import mimetypes
 from json.decoder import JSONDecodeError
 from html5lib.html5parser import ParseError
+from pathlib import Path
 
 
 def get_file_as_string(filename):
@@ -107,5 +109,35 @@ def is_valid_json(json, type=None, estr=None):
         return is_valid_json(json, 'str', str(e))
 
 
+def walk_fs_tree(path,
+                 pfunc=lambda p, root: print(f'{str(p.absolute())} : ' +
+                                             f'{str(p.relative_to(root))}'),
+                 ignore_hidden_files=True,
+                 root=None):
+    """walk and process files in fs tree
+
+         walk fs specified by Path object and executes pfunc
+         for each file found in path
+    """
+
+    if root is None:
+        root = path
+
+    for p in path.iterdir():
+        if p.is_dir():
+            walk_fs_tree(p, pfunc, ignore_hidden_files, root)
+        elif p.is_file() and not p.parts[-1].startswith('.'):
+            pfunc(p, root)
+
+
+def get_content_type_from_filename(filename):
+    """ get mime type from file name """
+
+    content_type, _ = mimetypes.guess_type(filename)
+    content_type =\
+        'text/plain' if not content_type else content_type
+
+    return content_type
+
 if __name__ == '__main__':
-    pass
+    passd

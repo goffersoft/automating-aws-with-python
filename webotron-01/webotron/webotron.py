@@ -89,5 +89,25 @@ def s3_bucket_setup(name, policy_file, index_file,
     print(f'Bucket Website Url : {get_s3_bucket_url(name)}')
 
 
+@s3.command('sync-bucket')
+@click.argument('path', default=None, type=click.Path(exists=True))
+@click.argument('name', default=None)
+@click.option('--validate', default=False, is_flag=True)
+def s3_bucket_sync(path, name, validate):
+    """ sync filesystem to s3 bucket
+
+            sync files found in fs specified by 'fs_pathname' to bucket
+            specified by 'bucket_name'.  optionally validate files (html only)
+    """
+
+    ok, err = sync_fs_to_s3_bucket(path, name, validate)
+
+    if not ok:
+        print(f'Cannot sync file system with bucket : {name} : {err}')
+        return
+
+    print(f'Bucket Sync Complete for s3 bucket : {name}')
+
+
 if __name__ == '__main__':
     cli()

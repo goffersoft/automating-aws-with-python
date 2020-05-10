@@ -1,6 +1,5 @@
 from boto3_helper import *
 from util import *
-import mimetypes
 
 g_s3_bucket_url_template = 'http://%s.s3-website-%s.amazonaws.com'
 

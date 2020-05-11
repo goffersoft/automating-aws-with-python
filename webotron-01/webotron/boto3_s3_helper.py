@@ -75,7 +75,7 @@ def s3_bucket_enable_webhosting(bucket_res, index_name, error_name):
         return False, str(client_error)
 
 
-def s3_bucket_cleanup(bucket_res):
+def s3_bucket_cleanup(bucket_name, bucket_res):
     """Delete S3 bucket and associated contents."""
     pass
 
@@ -192,6 +192,46 @@ def create_s3_bucket_object(bucket_res,
         return False, str(client_error)
 
     return True, None
+
+
+def setup_s3_bucket(name, policy_file, index_file,
+                    index_name, error_file, error_name):
+    """Set up a bucket for web hosting.
+
+    1) create a bucket using the (required) bucket name
+    and policy as a json string or file
+    default policy used if none provided
+    2) add 2 html object to the bucket - index.html / error.html
+    defaults used if none is provided
+    3) enable web hosting on this bucket
+    """
+    bucket_res, err = create_s3_bucket(name, policy_file)
+    if err is not None:
+        s3_bucket_cleanup(name, bucket_res)
+        return None, f'Cannot create bucket {name}: {err}'
+
+    ok, err = create_s3_bucket_object_html(bucket_res,
+                                           index_file,
+                                           index_name)
+    if not ok:
+        s3_bucket_cleanup(name, bucket_res)
+        return None, f'Cannot create bucket object {index_file} : {err}'
+
+    ok, err = create_s3_bucket_object_html(bucket_res,
+                                           error_file,
+                                           error_name)
+    if not ok:
+        s3_bucket_cleanup(name, bucket_res)
+        return None, f'Cannot create bucket {error_file} : {err}'
+
+    ok, err = s3_bucket_enable_webhosting(bucket_res,
+                                          index_name,
+                                          error_name)
+    if not ok:
+        s3_bucket_cleanup(name, bucket_res)
+        return None, f'Cannot enable web hosting on bucket : {name} : {err}'
+
+    return get_s3_bucket_url(name), None
 
 
 def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):

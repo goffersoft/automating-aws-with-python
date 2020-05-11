@@ -55,47 +55,16 @@ def list_s3_bucket_objects(name):
               help='name to use for the error s3 object')
 def s3_bucket_setup(name, policy_file, index_file,
                     index_name, error_file, error_name):
-    """Set up a bucket for web hosting.
+    """Set up a bucket for web hosting."""
+    url, err = boto3_s3_helper.setup_s3_bucket(name, policy_file,
+                                               index_file, index_name,
+                                               error_file, error_name)
 
-    1) create a bucket using the (required) bucket name
-    and policy as a json string or file
-    default policy used if none provided
-    2) add 2 html object to the bucket - index.html / error.html
-    defaults used if none is provided
-    3) enable web hosting on this bucket
-    """
-    bucket_res, err = boto3_s3_helper.create_s3_bucket(name, policy_file)
     if err is not None:
-        print(f'Cannot create bucket {name}: {err}')
-        boto3_s3_helper.s3_bucket_cleanup(bucket_res)
-        return
-
-    ok, err = boto3_s3_helper.create_s3_bucket_object_html(bucket_res,
-                                                           index_file,
-                                                           index_name)
-    if not ok:
-        print(f'Cannot create bucket object {index_file} : {err}')
-        boto3_s3_helper.s3_bucket_cleanup(bucket_res)
-        return
-
-    ok, err = boto3_s3_helper.create_s3_bucket_object_html(bucket_res,
-                                                           error_file,
-                                                           error_name)
-    if not ok:
-        print(f'Cannot create bucket {error_file} : {err}')
-        boto3_s3_helper.s3_bucket_cleanup(bucket_res)
-        return
-
-    ok, err = boto3_s3_helper.s3_bucket_enable_webhosting(bucket_res,
-                                                          index_name,
-                                                          error_name)
-    if not ok:
-        print(f'Cannot enable web hosting on bucket : {name} : {err}')
-        boto3_s3_helper.s3_bucket_cleanup(bucket_res)
-        return
-
-    print(f'Bucket Setup Complete for s3 bucket : {name}')
-    print(f'Bucket Website Url : {boto3_s3_helper.get_s3_bucket_url(name)}')
+        print(f'Error Setting Up Bucket For Web Hosting : {name} : {err}')
+    else:
+        print(f'Bucket Setup Complete for s3 bucket : {name}')
+        print(f'Bucket Website Url : {url}')
 
 
 @s3.command('sync-bucket')
@@ -112,9 +81,8 @@ def s3_bucket_sync(path, name, validate):
 
     if not ok:
         print(f'Cannot sync file system with bucket : {name} : {err}')
-        return
-
-    print(f'Bucket Sync Complete for s3 bucket : {name}')
+    else:
+        print(f'Bucket Sync Complete for s3 bucket : {name}')
 
 
 if __name__ == '__main__':

@@ -3,10 +3,10 @@
 
 """Utility functions."""
 
+import csv
 import mimetypes
 import json
 from json.decoder import JSONDecodeError
-
 import html5lib
 from html5lib.html5parser import ParseError
 
@@ -139,6 +139,23 @@ def get_content_type_from_filename(filename):
         'text/plain' if not content_type else content_type
 
     return content_type
+
+
+def csv_to_dict(csvfilename, outputdict, dictvalue_type):
+    """Initialize dictionary from the csvfile.
+
+    'output_dict' is a dictionary
+    'dictvalue_type' is the type associated with dict value
+    """
+    try:
+        with open(csvfilename) as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                outputdict[row[0]] = dictvalue_type(*row[1:len(row)])
+
+            return True, None
+    except FileNotFoundError as file_err:
+        return False, str(file_err)
 
 
 if __name__ == '__main__':

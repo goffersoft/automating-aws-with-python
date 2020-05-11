@@ -7,6 +7,7 @@ import click
 
 import boto3_s3_helper
 import boto3_helper
+import region_util
 
 
 @click.group()
@@ -14,9 +15,12 @@ import boto3_helper
               help='profile name to use while initializing the boto3 package')
 @click.option('--region', default=None,
               help='overide the region name in the aws profile')
-def cli(profile, region):
+@click.option('--config', default='config/region.csv',
+              help='region config csv file to use')
+def cli(profile, region, config):
     """Webotron - AWS Automation Tool."""
     boto3_helper.init(profile, region)
+    region_util.init(config)
 
 
 @cli.group()

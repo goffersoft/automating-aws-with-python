@@ -9,8 +9,7 @@ from botocore.exceptions import ClientError
 
 import boto3_helper
 import util
-
-g_s3_bucket_url_template = 'http://%s.s3-website-%s.amazonaws.com'
+import region_util
 
 
 def get_s3_resource():
@@ -118,8 +117,8 @@ def validate_and_get_s3_bucket_policy_as_string(bucket_name, bucket_policy):
 
 def get_s3_bucket_url(bucket_name):
     """Get S3 bucket url."""
-    return g_s3_bucket_url_template % (bucket_name,
-                                       boto3_helper.get_session().region_name)
+    endpoint = region_util.get_endpoint(boto3_helper.get_session().region_name)
+    return f'http://{bucket_name}.{endpoint}'
 
 
 def create_s3_bucket(name, policy):

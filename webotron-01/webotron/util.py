@@ -1,26 +1,32 @@
-import json
-import html5lib
+#! /usr/bin/python
+# -*- coding:utf-8 -*-
+
+"""Utility functions."""
+
 import mimetypes
+import json
 from json.decoder import JSONDecodeError
+
+import html5lib
 from html5lib.html5parser import ParseError
-from pathlib import Path
 
 
 def get_file_as_string(filename):
-    """  get the contents of a file as a string.
-         raises the FileNotFoundException
-    """
+    """Get the contents of a file as a string.
 
+    raises the FileNotFoundException
+    """
     try:
         with open(filename) as file:
             return file.read(), None
-    except FileNotFoundError as e:
-        return None, str(e)
+    except FileNotFoundError as file_error:
+        return None, str(file_error)
 
 
 def is_valid_html_file(html_file):
-    """  validates the contents of the file as html
-         raises the FileNotFoundException
+    """Validate the contents of the file as html.
+
+    raises the FileNotFoundException
     """
     with open(html_file) as file:
         try:
@@ -28,98 +34,94 @@ def is_valid_html_file(html_file):
             parser.parse(file)
 
             return True, None
-        except ParseError as e:
-            return False, str(e)
+        except ParseError as parse_error:
+            return False, str(parse_error)
 
 
 def is_valid_html_string(html_string):
-    """ validates the string passed in as html """
-
+    """Validate the string passed in as html."""
     try:
         parser = html5lib.HTMLParser(strict=True)
         parser.parse(html_string)
 
         return True, None
-    except ParseError as e:
-        return False, str(e)
+    except ParseError as parse_error:
+        return False, str(parse_error)
 
 
 def is_valid_json_file(json_file):
-    """  validates the contents of the file as json
-         raises the FileNotFoundException
-    """
+    """Validate the contents of the file as json.
 
+    raises the FileNotFoundException
+    """
     with open(json_file) as file:
         try:
             json.load(file)
             return True, None
-        except JSONDecodeError as e:
-            return False, str(e)
+        except JSONDecodeError as decode_error:
+            return False, str(decode_error)
 
 
 def is_valid_json_string(json_str):
-    """ validates the string passed in as json """
-
+    """Validate the string passed in as json."""
     try:
         json.loads(json_str)
         return True, None
-    except JSONDecodeError as e:
-        return False, str(e)
+    except JSONDecodeError as decode_error:
+        return False, str(decode_error)
 
 
-def is_valid_html(html, type=None, estr=None):
-    """ validates the filename or a string passed in as html """
-
+def is_valid_html(html_content, file_type=None, estr=None):
+    """Validate the filename or a string passed in as html."""
     try:
-        if type is None or type == 'file':
-            ok, err = is_valid_html_file(html)
+        if file_type is None or file_type == 'file':
+            ok, err = is_valid_html_file(html_content)
         else:
-            ok, err = is_valid_html_string(html)
+            ok, err = is_valid_html_string(html_content)
 
         if ok:
-            return True, 'file' if type is None else type, None
+            return True, 'file' if file_type is None else file_type, None
 
         if estr is None:
             return False, None, f'Invalid Json String: {err}'
-        else:
-            return False, None,\
-                f'Invalid file name or html string: str([{estr}, {err}])'
-    except FileNotFoundError as e:
-        return is_valid_html(html, 'str', str(e))
+
+        return False, None,\
+            f'Invalid file name or html string: str([{estr}, {err}])'
+    except FileNotFoundError as file_error:
+        return is_valid_html(html_content, 'str', str(file_error))
 
 
-def is_valid_json(json, type=None, estr=None):
-    """ validates the filename or a string passed in as json """
-
+def is_valid_json(json_content, file_type=None, estr=None):
+    """Validate the filename or a string passed in as json."""
     try:
-        if type is None or type == 'file':
-            ok, err = is_valid_json_file(json)
+        if file_type is None or file_type == 'file':
+            ok, err = is_valid_json_file(json_content)
         else:
-            ok, err = is_valid_json_string(json)
+            ok, err = is_valid_json_string(json_content)
 
         if ok:
-            return True, 'file' if type is None else type, None
+            return True, 'file' if file_type is None else file_type, None
 
         if estr is None:
             return False, None, 'Invalid Json String:' + err
-        else:
-            return False, None,\
-                f'Invalid file name or json string: str([{estr}, {err}])'
-    except FileNotFoundError as e:
-        return is_valid_json(json, 'str', str(e))
+
+        return False, None,\
+            f'Invalid file name or json string: str([{estr}, {err}])'
+    except FileNotFoundError as file_error:
+        return is_valid_json(json_content, 'str', str(file_error))
 
 
 def walk_fs_tree(path,
-                 pfunc=lambda p, root: print(f'{str(p.absolute())} : ' +
-                                             f'{str(p.relative_to(root))}'),
+                 pfunc=lambda p, root:
+                 print(f'{str(p)} : ' +
+                       f'{str(p.relative_to(root).as_posix())}'),
                  ignore_hidden_files=True,
                  root=None):
-    """walk and process files in fs tree
+    """Walk and process files in fs tree.
 
-         walk fs specified by Path object and executes pfunc
-         for each file found in path
+    walk fs specified by Path object and executes pfunc
+    for each file found in path
     """
-
     if root is None:
         root = path
 
@@ -131,13 +133,13 @@ def walk_fs_tree(path,
 
 
 def get_content_type_from_filename(filename):
-    """ get mime type from file name """
-
+    """Get mime type from file name."""
     content_type, _ = mimetypes.guess_type(filename)
     content_type =\
         'text/plain' if not content_type else content_type
 
     return content_type
 
+
 if __name__ == '__main__':
-    passd
+    pass

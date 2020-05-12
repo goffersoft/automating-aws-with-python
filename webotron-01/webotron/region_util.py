@@ -21,7 +21,7 @@ def get_endpoint(region):
     if not is_valid_region(region):
         return None, f'Invalid Region : {region}'
 
-    return g_region_endpoints[region].endpoint
+    return g_region_endpoints[region].endpoint, None
 
 
 def get_region_name(region):
@@ -29,7 +29,7 @@ def get_region_name(region):
     if not is_valid_region(region):
         return None, f'Invalid Region : {region}'
 
-    return g_region_endpoints[region].name
+    return g_region_endpoints[region].name, None
 
 
 def get_zone(region):
@@ -37,7 +37,7 @@ def get_zone(region):
     if not is_valid_region(region):
         return None, f'Invalid Region : {region}'
 
-    return g_region_endpoints[region].zone
+    return g_region_endpoints[region].zone, None
 
 
 def init(csvfile='config/region.csv'):

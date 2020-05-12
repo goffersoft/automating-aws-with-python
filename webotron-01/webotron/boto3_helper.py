@@ -23,12 +23,17 @@ def get_client(cname):
     return get_session().client(cname)
 
 
+def get_default_region():
+    """Get default region."""
+    return 'us-east-1'
+
+
 def is_default_region():
-    """Get default aws region.
+    """Validate aws region in session is 'us-east-1.
 
     Check and see if region associated with session is us-east-1(default)
     """
-    return get_session().region_name == 'us-east-1'
+    return get_session().region_name == get_default_region()
 
 
 def get_client_error_code(err_response):

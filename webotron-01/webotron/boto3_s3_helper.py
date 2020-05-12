@@ -115,10 +115,28 @@ def validate_and_get_s3_bucket_policy_as_string(bucket_name, bucket_policy):
     return bucket_policy % bucket_name, None
 
 
+def get_region_name_from_s3_bucket(bucket_name):
+    """Get S3 bucket region_name from bucket name."""
+    try:
+        response_dict = get_s3_resource().\
+                        meta.client.\
+                        get_bucket_location(Bucket=bucket_name)
+        return response_dict['LocationConstraint'] or \
+            boto3_helper.get_default_region()
+    except ClientError as client_error:
+        return None, str(client_error)
+
+
 def get_s3_bucket_url(bucket_name):
     """Get S3 bucket url."""
-    endpoint = region_util.get_endpoint(boto3_helper.get_session().region_name)
-    return f'http://{bucket_name}.{endpoint}'
+    try:
+        region_name = get_region_name_from_s3_bucket(bucket_name)
+        endpoint, err = region_util.get_endpoint(region_name)
+        if err:
+            return None, err
+        return f'http://{bucket_name}.{endpoint}', None
+    except ClientError as client_error:
+        return None, str(client_error)
 
 
 def create_s3_bucket(name, policy):
@@ -230,7 +248,7 @@ def setup_s3_bucket(name, policy_file, index_file,
         s3_bucket_cleanup(name, bucket_res)
         return None, f'Cannot enable web hosting on bucket : {name} : {err}'
 
-    return get_s3_bucket_url(name), None
+    return get_s3_bucket_url(name)
 
 
 def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):
@@ -240,7 +258,7 @@ def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):
     specified by 'bucket_name'.  optionally validate files (html only)
     """
     if not is_valid_s3_bucket(bucket_name):
-        return False, 'Bucket Doesnot Exist : ' + \
+        return None, 'Bucket Doesnot Exist : ' + \
                       'Bucket needs to be setup first using ' + \
                       "the 'setup-bucket' command"
 
@@ -268,10 +286,10 @@ def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):
                 create_s3_bucket_object(
                     get_s3_bucket_resource(bucket_name), k, v)
             if not ok:
-                return False, err
-        return True, None
+                return None, err
+        return get_s3_bucket_url(bucket_name)
 
-    return False, str(err_map)
+    return None, str(err_map)
 
 
 if __name__ == '__main__':

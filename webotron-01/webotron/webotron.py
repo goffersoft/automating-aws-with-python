@@ -20,7 +20,10 @@ import region_util
 def cli(profile, region, config):
     """Webotron - AWS Automation Tool."""
     boto3_helper.init(profile, region)
-    region_util.init(config)
+    ok, err = region_util.init(config)
+
+    if not ok:
+        print(f'WARNING : Cannot load s3 endpoints from file {config} : {err}')
 
 
 @cli.group()
@@ -81,12 +84,13 @@ def s3_bucket_sync(path, name, validate):
     sync files found in fs specified by 'fs_pathname' to bucket
     specified by 'bucket_name'.  optionally validate files (html only)
     """
-    ok, err = boto3_s3_helper.sync_fs_to_s3_bucket(path, name, validate)
+    url, err = boto3_s3_helper.sync_fs_to_s3_bucket(path, name, validate)
 
-    if not ok:
+    if err:
         print(f'Cannot sync file system with bucket : {name} : {err}')
     else:
         print(f'Bucket Sync Complete for s3 bucket : {name}')
+        print(f'Bucket Website Url : {url}')
 
 
 if __name__ == '__main__':

@@ -45,9 +45,9 @@ def get_s3_paginator(session, name):
         return None, str(key_error)
 
 
-def get_s3_list_buck_v2_paginator(session):
+def get_s3_list_bucket_v2_paginator(session):
     """Get s3 'ListObjectsV2' paginator."""
-    return get_s3_paginator(session, 'list_objects_v')[0]
+    return get_s3_paginator(session, 'list_objects_v2')[0]
 
 
 def is_valid_s3_bucket(session, name):
@@ -242,6 +242,22 @@ def create_s3_bucket_object(session, bucket_res,
     return True, None
 
 
+def get_s3_object_metadata(session, bucket_name):
+    """Get etag associated with S3 objects."""
+    paginator = get_s3_list_bucket_v2_paginator(session)
+
+    metadata = {}
+
+    try:
+        pages = paginator.paginate(Bucket=bucket_name)
+        for page in pages:
+            for meta in page['Contents']:
+                metadata[meta['Key']] = meta['ETag']
+        return metadata, None
+    except ClientError as client_error:
+        return None, str(client_error)
+
+
 def setup_s3_bucket(session, name, policy_file, index_file,
                     index_name, error_file, error_name):
     """Set up a bucket for web hosting.
@@ -295,6 +311,7 @@ def sync_fs_to_s3_bucket(session, fs_pathname, bucket_name, validate):
 
     path_map = {}
     err_map = {}
+    metadata, _ = get_s3_object_metadata(session, bucket_name)
 
     def fswalk(path, root):
         pathname = str(path)
@@ -307,7 +324,14 @@ def sync_fs_to_s3_bucket(session, fs_pathname, bucket_name, validate):
                 err_map[pathname] = err
                 return
 
-        path_map[pathname] = filename
+        chunk_size = session.get_s3_session_context().get_chunk_size()
+        sync_flag = True
+        if metadata and metadata.get(filename, None):
+            md5digest, err = util.md5digest(pathname, chunk_size)
+            if not err and md5digest == metadata[filename][1:-1]:
+                sync_flag = False
+        if sync_flag:
+            path_map[pathname] = filename
 
     util.walk_fs_tree(Path(fs_pathname).expanduser().resolve(), fswalk)
 

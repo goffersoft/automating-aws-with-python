@@ -63,7 +63,6 @@ class Region():
 
     def __init__(self, csvfile='config/region.csv'):
         """Initialize the Region singleton class."""
-        print(__file__)
         if not Region.instance:
             Region.instance = Region.__Region(csvfile)
 

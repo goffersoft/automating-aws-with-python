@@ -16,7 +16,7 @@ Endpoint = namedtuple('Endpont', ['name', 'endpoint', 'zone'])
 class Region():
     """class to maintain mapping of region names to s3 endpoints and zones."""
 
-    class __Region:
+    class __Region():
         """singleton class map region names to s3 endpoints."""
 
         def __init__(self, csvfile='config/region.csv'):

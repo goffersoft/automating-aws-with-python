@@ -70,11 +70,6 @@ class Region():
         """Delegate getattr requests to the inner class."""
         return getattr(self.instance, name)
 
-    @classmethod
-    def init(cls, csvfile='config/region.csv'):
-        """Re-Initialize the singleton class with new config."""
-        cls.instance.init(csvfile)
-
 
 if __name__ == '__main__':
     pass

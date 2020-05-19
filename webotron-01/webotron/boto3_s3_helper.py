@@ -3,41 +3,59 @@
 
 """Boto3 S3 helper functions."""
 
+
 from pathlib import Path
 
 from botocore.exceptions import ClientError
+from boto3.s3.transfer import TransferConfig
 
-import boto3_helper
-import util
-import region_util
+try:
+    import boto3_helper
+    import util
+except ModuleNotFoundError:
+    from . import boto3_helper
+    from . import util
 
 
-def get_s3_resource():
+def get_s3_resource(session):
     """Get s3 resource."""
-    return boto3_helper.get_resource('s3')
+    return session.get_resource('s3')
 
 
-def get_s3_client():
+def get_s3_client(session):
     """Get s3 client."""
-    return boto3_helper.get_client('s3')
+    return session.get_client('s3')
 
 
-def get_s3_bucket_resources():
+def get_s3_bucket_resources(session):
     """Get all s3 bucket resources as iterable."""
-    return get_s3_resource().buckets.all()
+    return get_s3_resource(session).buckets.all()
 
 
-def get_s3_bucket_resource(name):
+def get_s3_bucket_resource(session, name):
     """Get s3 bucket resource associated with name."""
-    return get_s3_resource().Bucket(name)
+    return get_s3_resource(session).Bucket(name)
 
 
-def is_valid_s3_bucket(name):
+def get_s3_paginator(session, name):
+    """Get s3 paginator."""
+    try:
+        return get_s3_client(session).get_paginator(name), None
+    except KeyError as key_error:
+        return None, str(key_error)
+
+
+def get_s3_list_buck_v2_paginator(session):
+    """Get s3 'ListObjectsV2' paginator."""
+    return get_s3_paginator(session, 'list_objects_v')[0]
+
+
+def is_valid_s3_bucket(session, name):
     """Validate s3 bucket.
 
     check to see if bucket associated with 'name'.  has been created or not
     """
-    return get_s3_bucket_resource(name).creation_date is not None
+    return get_s3_bucket_resource(session, name).creation_date is not None
 
 
 def get_s3_bucket_website_resource(bucket_resource):
@@ -74,7 +92,7 @@ def s3_bucket_enable_webhosting(bucket_res, index_name, error_name):
         return False, str(client_error)
 
 
-def s3_bucket_cleanup(bucket_name, bucket_res):
+def s3_bucket_cleanup(session, bucket_name, bucket_res):
     """Delete S3 bucket and associated contents."""
     pass
 
@@ -115,10 +133,10 @@ def validate_and_get_s3_bucket_policy_as_string(bucket_name, bucket_policy):
     return bucket_policy % bucket_name, None
 
 
-def get_region_name_from_s3_bucket(bucket_name):
+def get_region_name_from_s3_bucket(session, bucket_name):
     """Get S3 bucket region_name from bucket name."""
     try:
-        response_dict = get_s3_resource().\
+        response_dict = get_s3_resource(session).\
                         meta.client.\
                         get_bucket_location(Bucket=bucket_name)
         return response_dict['LocationConstraint'] or \
@@ -127,11 +145,11 @@ def get_region_name_from_s3_bucket(bucket_name):
         return None, str(client_error)
 
 
-def get_s3_bucket_url(bucket_name):
+def get_s3_bucket_url(session, bucket_name):
     """Get S3 bucket url."""
     try:
-        region_name = get_region_name_from_s3_bucket(bucket_name)
-        endpoint, err = region_util.get_endpoint(region_name)
+        region_name = get_region_name_from_s3_bucket(session, bucket_name)
+        endpoint, err = session.get_region_config().get_endpoint(region_name)
         if err:
             return None, err
         return f'http://{bucket_name}.{endpoint}', None
@@ -139,7 +157,7 @@ def get_s3_bucket_url(bucket_name):
         return None, str(client_error)
 
 
-def create_s3_bucket(name, policy):
+def create_s3_bucket(session, name, policy):
     """Create a s3 bucket."""
     bucket = None
 
@@ -150,14 +168,19 @@ def create_s3_bucket(name, policy):
         if err is not None:
             return None, err
 
-        if boto3_helper.is_default_region():
-            bucket = get_s3_resource().create_bucket(Bucket=name)
+        bucket_region = session.get_region_name()
+
+        if is_valid_s3_bucket(session, name):
+            bucket_region = get_region_name_from_s3_bucket(session, name)
+
+        if session.is_default_region(bucket_region):
+            bucket = get_s3_resource(session).create_bucket(Bucket=name)
         else:
-            bucket = get_s3_resource()\
+            bucket = get_s3_resource(session)\
                 .create_bucket(Bucket=name,
                                CreateBucketConfiguration={
                                    'LocationConstraint':
-                                   boto3_helper.get_session().region_name})
+                                   bucket_region})
 
         ok, err = create_s3_bucket_policy(bucket, policy, False)
 
@@ -167,14 +190,14 @@ def create_s3_bucket(name, policy):
     except ClientError as client_error:
         if boto3_helper.get_client_error_code(client_error) == \
            'BucketAlreadyOwnedByYou':
-            bucket = get_s3_bucket_resource(name)
+            bucket = get_s3_bucket_resource(session, name)
         else:
             return None, str(client_error)
 
     return bucket, None
 
 
-def create_s3_bucket_object_html(bucket_res, html_content, keyname):
+def create_s3_bucket_object_html(session, bucket_res, html_content, keyname):
     """Create a s3 bucket (html) object."""
     ok, file_type, err = util.is_valid_html(html_content)
 
@@ -183,19 +206,19 @@ def create_s3_bucket_object_html(bucket_res, html_content, keyname):
 
     try:
         if file_type == 'str':
-            get_s3_resource().Object(bucket_res.name, keyname)\
+            get_s3_resource(session).Object(bucket_res.name, keyname)\
                              .put(Body=bytes(html_content),
                                   ContentType='text/html')
-        else:
-            bucket_res.upload_file(html_content, keyname,
-                                   ExtraArgs={'ContentType': 'text/html'})
+            return True, None
+
+        return create_s3_bucket_object(session, bucket_res,
+                                       html_content, keyname,
+                                       'text/html')
     except ClientError as client_error:
         return False, str(client_error)
 
-    return True, None
 
-
-def create_s3_bucket_object(bucket_res,
+def create_s3_bucket_object(session, bucket_res,
                             filename, keyname,
                             content_type=None):
     """Create a s3 object in the specified bucket."""
@@ -203,15 +226,23 @@ def create_s3_bucket_object(bucket_res,
         if content_type is None:
             content_type = util.get_content_type_from_filename(keyname)
 
-        bucket_res.upload_file(filename, keyname,
-                               ExtraArgs={'ContentType': content_type})
+        chunk_size = session.get_s3_session_context().get_chunk_size()
+        filename, err = util.get_file_path(filename)
+        if err:
+            return False, err
+        bucket_res.upload_file(
+            filename, keyname,
+            ExtraArgs={'ContentType': content_type},
+            Config=TransferConfig(
+                multipart_threshold=chunk_size,
+                multipart_chunksize=chunk_size))
     except ClientError as client_error:
         return False, str(client_error)
 
     return True, None
 
 
-def setup_s3_bucket(name, policy_file, index_file,
+def setup_s3_bucket(session, name, policy_file, index_file,
                     index_name, error_file, error_name):
     """Set up a bucket for web hosting.
 
@@ -222,42 +253,42 @@ def setup_s3_bucket(name, policy_file, index_file,
     defaults used if none is provided
     3) enable web hosting on this bucket
     """
-    bucket_res, err = create_s3_bucket(name, policy_file)
+    bucket_res, err = create_s3_bucket(session, name, policy_file)
     if err is not None:
-        s3_bucket_cleanup(name, bucket_res)
+        s3_bucket_cleanup(session, name, bucket_res)
         return None, f'Cannot create bucket {name}: {err}'
 
-    ok, err = create_s3_bucket_object_html(bucket_res,
+    ok, err = create_s3_bucket_object_html(session, bucket_res,
                                            index_file,
                                            index_name)
     if not ok:
-        s3_bucket_cleanup(name, bucket_res)
+        s3_bucket_cleanup(session, name, bucket_res)
         return None, f'Cannot create bucket object {index_file} : {err}'
 
-    ok, err = create_s3_bucket_object_html(bucket_res,
+    ok, err = create_s3_bucket_object_html(session, bucket_res,
                                            error_file,
                                            error_name)
     if not ok:
-        s3_bucket_cleanup(name, bucket_res)
+        s3_bucket_cleanup(session, name, bucket_res)
         return None, f'Cannot create bucket {error_file} : {err}'
 
     ok, err = s3_bucket_enable_webhosting(bucket_res,
                                           index_name,
                                           error_name)
     if not ok:
-        s3_bucket_cleanup(name, bucket_res)
+        s3_bucket_cleanup(session, name, bucket_res)
         return None, f'Cannot enable web hosting on bucket : {name} : {err}'
 
-    return get_s3_bucket_url(name)
+    return get_s3_bucket_url(session, name)
 
 
-def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):
+def sync_fs_to_s3_bucket(session, fs_pathname, bucket_name, validate):
     """Sync fs to s3 bucket.
 
     sync files found in fs specified by 'fs_pathname' to bucket
     specified by 'bucket_name'.  optionally validate files (html only)
     """
-    if not is_valid_s3_bucket(bucket_name):
+    if not is_valid_s3_bucket(session, bucket_name):
         return None, 'Bucket Doesnot Exist : ' + \
                       'Bucket needs to be setup first using ' + \
                       "the 'setup-bucket' command"
@@ -265,9 +296,9 @@ def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):
     path_map = {}
     err_map = {}
 
-    def fswalk(p, root):
-        pathname = str(p)
-        filename = str(p.relative_to(root).as_posix())
+    def fswalk(path, root):
+        pathname = str(path)
+        filename = str(path.relative_to(root).as_posix())
         content_type = util.get_content_type_from_filename(filename)
 
         if validate and content_type.find('html') != -1:
@@ -281,13 +312,14 @@ def sync_fs_to_s3_bucket(fs_pathname, bucket_name, validate):
     util.walk_fs_tree(Path(fs_pathname).expanduser().resolve(), fswalk)
 
     if len(err_map) == 0:
-        for k, v in path_map.items():
+        for key, value in path_map.items():
             ok, err = \
                 create_s3_bucket_object(
-                    get_s3_bucket_resource(bucket_name), k, v)
+                    session,
+                    get_s3_bucket_resource(session, bucket_name), key, value)
             if not ok:
                 return None, err
-        return get_s3_bucket_url(bucket_name)
+        return get_s3_bucket_url(session, bucket_name)
 
     return None, str(err_map)
 

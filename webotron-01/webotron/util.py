@@ -7,6 +7,8 @@ import csv
 import mimetypes
 import json
 from json.decoder import JSONDecodeError
+import hashlib
+from pathlib import Path
 import html5lib
 from html5lib.html5parser import ParseError
 
@@ -17,6 +19,9 @@ def get_file_as_string(filename):
     raises the FileNotFoundException
     """
     try:
+        fname, err = get_file_path(filename)
+        if not err:
+            filename = fname
         with open(filename) as file:
             return file.read(), None
     except FileNotFoundError as file_error:
@@ -28,6 +33,9 @@ def is_valid_html_file(html_file):
 
     raises the FileNotFoundException
     """
+    fname, err = get_file_path(html_file)
+    if not err:
+        html_file = fname
     with open(html_file) as file:
         try:
             parser = html5lib.HTMLParser(strict=True)
@@ -54,6 +62,9 @@ def is_valid_json_file(json_file):
 
     raises the FileNotFoundException
     """
+    fname, err = get_file_path(json_file)
+    if not err:
+        json_file = fname
     with open(json_file) as file:
         try:
             json.load(file)
@@ -125,11 +136,11 @@ def walk_fs_tree(path,
     if root is None:
         root = path
 
-    for p in path.iterdir():
-        if p.is_dir():
-            walk_fs_tree(p, pfunc, ignore_hidden_files, root)
-        elif p.is_file() and not p.parts[-1].startswith('.'):
-            pfunc(p, root)
+    for node in path.iterdir():
+        if node.is_dir():
+            walk_fs_tree(node, pfunc, ignore_hidden_files, root)
+        elif node.is_file() and not node.parts[-1].startswith('.'):
+            pfunc(node, root)
 
 
 def get_content_type_from_filename(filename):
@@ -148,6 +159,10 @@ def csv_to_dict(csvfilename, outputdict, dictvalue_type):
     'dictvalue_type' is the type associated with dict value
     """
     try:
+        fname, err = get_file_path(csvfilename)
+        if not err:
+            csvfilename = fname
+
         with open(csvfilename) as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
@@ -156,6 +171,69 @@ def csv_to_dict(csvfilename, outputdict, dictvalue_type):
             return True, None
     except FileNotFoundError as file_err:
         return False, str(file_err)
+
+
+def md5digest(filename, chunksize=None):
+    """Compute the md5digest in hex of the contents of 'filename'.
+
+    if chunksize is None or the file size <= chunk size
+    then the md5 digest is computed on the entire file
+
+    if filesize is > chunksize
+    then the md5digest is computed for each individual chunk
+    of the file. These digests are then appended together
+    and an digest of digests is computed and returned.
+    the number of chunks is appended to the returned digest
+    """
+    try:
+        md5s = []
+        fname, err = get_file_path(filename)
+        if not err:
+            filename = fname
+        with open(filename, 'rb') as file:
+            while True:
+                if chunksize is None:
+                    data = file.read()
+                else:
+                    data = file.read(chunksize)
+
+                if data:
+                    md5s.append(hashlib.md5(data))
+                else:
+                    break
+
+        if len(md5s) < 1:
+            return hashlib.md5().hexdigest(), None
+
+        if len(md5s) == 1:
+            return md5s[0].hexdigest(), None
+
+        data = b''.join(md5.digest() for md5 in md5s)
+        return '{}-{}'.format(hashlib.md5(data).hexdigest(), len(md5s)), None
+    except FileNotFoundError as file_error:
+        return None, str(file_error)
+
+
+def get_file_path(path):
+    """Determine if path is within the webotron directory.
+
+    if input path is valid, return input path
+    else
+        1) get path of this module
+        2) get its parent
+        3) concatenate parent with 'path'
+        4) if valid path, return this new path
+    """
+    node = Path(path)
+    if node.exists():
+        return path, None
+
+    node = Path(__file__).parent.joinpath(path)
+
+    if node.exists():
+        return str(node), None
+
+    return None, f'Invalid path name : {path}'
 
 
 if __name__ == '__main__':

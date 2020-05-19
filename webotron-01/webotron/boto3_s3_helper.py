@@ -4,8 +4,6 @@
 """Boto3 S3 helper functions."""
 
 
-from pathlib import Path
-
 from botocore.exceptions import ClientError
 from boto3.s3.transfer import TransferConfig
 
@@ -256,96 +254,6 @@ def get_s3_object_metadata(session, bucket_name):
         return metadata, None
     except ClientError as client_error:
         return None, str(client_error)
-
-
-def setup_s3_bucket(session, name, policy_file, index_file,
-                    index_name, error_file, error_name):
-    """Set up a bucket for web hosting.
-
-    1) create a bucket using the (required) bucket name
-    and policy as a json string or file
-    default policy used if none provided
-    2) add 2 html object to the bucket - index.html / error.html
-    defaults used if none is provided
-    3) enable web hosting on this bucket
-    """
-    bucket_res, err = create_s3_bucket(session, name, policy_file)
-    if err is not None:
-        s3_bucket_cleanup(session, name, bucket_res)
-        return None, f'Cannot create bucket {name}: {err}'
-
-    ok, err = create_s3_bucket_object_html(session, bucket_res,
-                                           index_file,
-                                           index_name)
-    if not ok:
-        s3_bucket_cleanup(session, name, bucket_res)
-        return None, f'Cannot create bucket object {index_file} : {err}'
-
-    ok, err = create_s3_bucket_object_html(session, bucket_res,
-                                           error_file,
-                                           error_name)
-    if not ok:
-        s3_bucket_cleanup(session, name, bucket_res)
-        return None, f'Cannot create bucket {error_file} : {err}'
-
-    ok, err = s3_bucket_enable_webhosting(bucket_res,
-                                          index_name,
-                                          error_name)
-    if not ok:
-        s3_bucket_cleanup(session, name, bucket_res)
-        return None, f'Cannot enable web hosting on bucket : {name} : {err}'
-
-    return get_s3_bucket_url(session, name)
-
-
-def sync_fs_to_s3_bucket(session, fs_pathname, bucket_name, validate):
-    """Sync fs to s3 bucket.
-
-    sync files found in fs specified by 'fs_pathname' to bucket
-    specified by 'bucket_name'.  optionally validate files (html only)
-    """
-    if not is_valid_s3_bucket(session, bucket_name):
-        return None, 'Bucket Doesnot Exist : ' + \
-                      'Bucket needs to be setup first using ' + \
-                      "the 'setup-bucket' command"
-
-    path_map = {}
-    err_map = {}
-    metadata, _ = get_s3_object_metadata(session, bucket_name)
-
-    def fswalk(path, root):
-        pathname = str(path)
-        filename = str(path.relative_to(root).as_posix())
-        content_type = util.get_content_type_from_filename(filename)
-
-        if validate and content_type.find('html') != -1:
-            ok, err = util.is_valid_html_file(pathname)
-            if not ok:
-                err_map[pathname] = err
-                return
-
-        chunk_size = session.get_s3_session_context().get_chunk_size()
-        sync_flag = True
-        if metadata and metadata.get(filename, None):
-            md5digest, err = util.md5digest(pathname, chunk_size)
-            if not err and md5digest == metadata[filename][1:-1]:
-                sync_flag = False
-        if sync_flag:
-            path_map[pathname] = filename
-
-    util.walk_fs_tree(Path(fs_pathname).expanduser().resolve(), fswalk)
-
-    if len(err_map) == 0:
-        for key, value in path_map.items():
-            ok, err = \
-                create_s3_bucket_object(
-                    session,
-                    get_s3_bucket_resource(session, bucket_name), key, value)
-            if not ok:
-                return None, err
-        return get_s3_bucket_url(session, bucket_name)
-
-    return None, str(err_map)
 
 
 if __name__ == '__main__':

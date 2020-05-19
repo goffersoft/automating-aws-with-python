@@ -6,15 +6,15 @@
 import click
 
 try:
-    import boto3_s3_helper
     from region_util import Region
     from boto3_session import Boto3SessionContext
     from boto3_s3_session import Boto3S3SessionContext
+    from s3_bucket_manager import S3BucketManager
 except ModuleNotFoundError:
-    from . import boto3_s3_helper
     from .regionutil import Region
     from .boto3_session import Boto3SessionContext
     from .boto3_s3_session import Boto3S3SessionContext
+    from .s3_bucket_manager import S3BucketManager
 
 
 pass_context = click.make_pass_decorator(Boto3SessionContext,
@@ -56,18 +56,15 @@ def s3(session, chunk_size):
 @pass_context
 def list_s3_buckets(session):
     """List all S3 buckets."""
-    for bucket in boto3_s3_helper.get_s3_bucket_resources(session):
-        print(bucket)
+    S3BucketManager(session).list_buckets()
 
 
 @s3.command('list-bucket-objects')
 @click.argument('name', default=None)
 @pass_context
 def list_s3_bucket_objects(session, name):
-    """List all S3 bucket objects associated with bucker name."""
-    for obj in boto3_s3_helper.\
-            get_s3_bucket_resource(session, name).objects.all():
-        print(obj)
+    """List all S3 bucket objects associated with bucket name."""
+    S3BucketManager(session).list_bucket_objects(name)
 
 
 @s3.command('setup-bucket')
@@ -87,9 +84,10 @@ def list_s3_bucket_objects(session, name):
 def s3_bucket_setup(session, name, policy_file, index_file,
                     index_name, error_file, error_name):
     """Set up a bucket for web hosting."""
-    url, err = boto3_s3_helper.setup_s3_bucket(session, name, policy_file,
-                                               index_file, index_name,
-                                               error_file, error_name)
+    url, err = S3BucketManager(session).\
+        setup_bucket(name, policy_file,
+                     index_file, index_name,
+                     error_file, error_name)
 
     if err is not None:
         print(f'Error Setting Up Bucket For Web Hosting : {name} : {err}')
@@ -109,8 +107,8 @@ def s3_bucket_sync(session, path, name, validate):
     sync files found in fs specified by 'fs_pathname' to bucket
     specified by 'bucket_name'.  optionally validate files (html only)
     """
-    url, err = boto3_s3_helper.\
-        sync_fs_to_s3_bucket(session, path, name, validate)
+    url, err = S3BucketManager(session).\
+        sync_fs_to_bucket(path, name, validate)
 
     if err:
         print(f'Cannot sync file system with bucket : {name} : {err}')

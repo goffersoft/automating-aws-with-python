@@ -6,32 +6,30 @@
 from pathlib import Path
 
 try:
-    import boto3_s3_helper
     import util
 except ModuleNotFoundError:
-    from . import boto3_s3_helper
     from . import util
 
 
 class S3BucketManager():
     """S3 Bucket Manager class."""
 
-    def __init__(self, session):
+    def __init__(self, s3_session):
         """Initialize BucketManager class."""
-        self.session = session
+        self.s3_session = s3_session
 
     def list_buckets(self, pfunc=lambda bucket: print(bucket)):
         """List S3 Buckets Associated with this account."""
-        for bucket in boto3_s3_helper.get_s3_bucket_resources(self.session):
+        for bucket in self.s3_session.get_s3_bucket_resources():
             pfunc(bucket)
 
     def list_bucket_objects(self, bucket_name,
                             pfunc=lambda object: print(object)):
         """List S3 Objects Associated with this S3 Bucket."""
-        for object in boto3_s3_helper.\
-                get_s3_bucket_resource(self.session, bucket_name).\
+        for obj in self.s3_session.\
+                get_s3_bucket_resource(bucket_name).\
                 objects.all():
-            pfunc(object)
+            pfunc(obj)
 
     def setup_bucket(self, name, policy_file, index_file,
                      index_name, error_file, error_name):
@@ -45,39 +43,37 @@ class S3BucketManager():
         3) enable web hosting on this bucket
         """
         bucket_res, err =\
-            boto3_s3_helper.create_s3_bucket(self.session, name, policy_file)
+            self.s3_session.create_s3_bucket(name, policy_file)
         if err is not None:
-            boto3_s3_helper.s3_bucket_cleanup(self.session, name, bucket_res)
+            self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot create bucket {name}: {err}'
 
-        ok, err = boto3_s3_helper.\
-            create_s3_bucket_object_html(self.session,
-                                         bucket_res,
+        ok, err = self.s3_session.\
+            create_s3_bucket_object_html(bucket_res,
                                          index_file,
                                          index_name)
         if not ok:
-            boto3_s3_helper.s3_bucket_cleanup(self.session, name, bucket_res)
+            self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot create bucket object {index_file} : {err}'
 
-        ok, err = boto3_s3_helper.\
-            create_s3_bucket_object_html(self.session,
-                                         bucket_res,
+        ok, err = self.s3_session.\
+            create_s3_bucket_object_html(bucket_res,
                                          error_file,
                                          error_name)
         if not ok:
-            boto3_s3_helper.s3_bucket_cleanup(self.session, name, bucket_res)
+            self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot create bucket {error_file} : {err}'
 
-        ok, err = boto3_s3_helper.\
+        ok, err = self.s3_session.\
             s3_bucket_enable_webhosting(bucket_res,
                                         index_name,
                                         error_name)
         if not ok:
-            boto3_s3_helper.s3_bucket_cleanup(self.session, name, bucket_res)
+            self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot enable web hosting \
                            on bucket : {name} : {err}'
 
-        return boto3_s3_helper.get_s3_bucket_url(self.session, name)
+        return self.s3_session.get_s3_bucket_url(name)
 
     def sync_fs_to_bucket(self, fs_pathname, bucket_name, validate):
         """Sync fs to s3 bucket.
@@ -85,7 +81,7 @@ class S3BucketManager():
         sync files found in fs specified by 'fs_pathname' to bucket
         specified by 'bucket_name'.  optionally validate files (html only)
         """
-        if not boto3_s3_helper.is_valid_s3_bucket(self.session, bucket_name):
+        if not self.s3_session.is_valid_s3_bucket(bucket_name):
             return None, 'Bucket Doesnot Exist : ' + \
                           'Bucket needs to be setup first using ' + \
                           "the 'setup-bucket' command"
@@ -93,7 +89,7 @@ class S3BucketManager():
         path_map = {}
         err_map = {}
         metadata, _ =\
-            boto3_s3_helper.get_s3_object_metadata(self.session, bucket_name)
+            self.s3_session.get_s3_object_metadata(bucket_name)
 
         def fswalk(path, root):
             pathname = str(path)
@@ -106,7 +102,7 @@ class S3BucketManager():
                     err_map[pathname] = err
                     return
 
-            chunk_size = self.session.get_s3_session_context().get_chunk_size()
+            chunk_size = self.s3_session.get_chunk_size()
             sync_flag = True
             if metadata and metadata.get(filename, None):
                 md5digest, err = util.md5digest(pathname, chunk_size)
@@ -120,14 +116,12 @@ class S3BucketManager():
         if len(err_map) == 0:
             for key, value in path_map.items():
                 ok, err = \
-                    boto3_s3_helper.create_s3_bucket_object(
-                        self.session,
-                        boto3_s3_helper.
-                        get_s3_bucket_resource(self.session, bucket_name),
+                    self.s3_session.create_s3_bucket_object(
+                        self.s3_session.get_s3_bucket_resource(bucket_name),
                         key, value)
                 if not ok:
                     return None, err
-            return boto3_s3_helper.get_s3_bucket_url(self.session, bucket_name)
+            return self.s3_session.get_s3_bucket_url(bucket_name)
 
         return None, str(err_map)
 

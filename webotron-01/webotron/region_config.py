@@ -13,10 +13,10 @@ except ModuleNotFoundError:
 Endpoint = namedtuple('Endpont', ['name', 'endpoint', 'zone'])
 
 
-class Region():
+class RegionConfig():
     """class to maintain mapping of region names to s3 endpoints and zones."""
 
-    class __Region():
+    class __RegionConfig():
         """singleton class map region names to s3 endpoints."""
 
         def __init__(self, csvfile='config/region.csv'):
@@ -63,8 +63,9 @@ class Region():
 
     def __init__(self, csvfile='config/region.csv'):
         """Initialize the Region singleton class."""
-        if not Region.instance:
-            Region.instance = Region.__Region(csvfile)
+        if not RegionConfig.instance:
+            RegionConfig.instance = \
+                 RegionConfig.__RegionConfig(csvfile)
 
     def __getattr__(self, name):
         """Delegate getattr requests to the inner class."""

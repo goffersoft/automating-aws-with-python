@@ -6,24 +6,24 @@
 import click
 
 try:
-    from region_util import Region
-    from boto3_session import Boto3SessionContext
-    from boto3_s3_session import Boto3S3SessionContext
-    from s3_bucket_manager import S3BucketManager
+    from region_config import RegionConfig
+    from session import SessionManager
+    from s3_session import S3SessionManager
+    from s3_bucket import S3BucketManager
 except ModuleNotFoundError:
-    from .regionutil import Region
-    from .boto3_session import Boto3SessionContext
-    from .boto3_s3_session import Boto3S3SessionContext
-    from .s3_bucket_manager import S3BucketManager
+    from .region_config import RegionConfig
+    from .session import SessionManager
+    from .s3_session import S3SessionManager
+    from .s3_bucket import S3BucketManager
 
 
-pass_context = click.make_pass_decorator(Boto3SessionContext,
+pass_context = click.make_pass_decorator(SessionManager,
                                          ensure=True)
 
 
 @click.group()
 @click.option('--profile', default='python_automation',
-              help='profile name to use while initializing the boto3 package')
+              help='profile name to use while creatting a boto3 session')
 @click.option('--region', default=None,
               help='overide the region name in the aws profile')
 @click.option('--config', default='config/region.csv',
@@ -34,7 +34,7 @@ def cli(session, profile, region, config):
     region_config = None
 
     try:
-        region_config = Region(config)
+        region_config = RegionConfig(config)
     except FileNotFoundError as file_err:
         print(f'WARNING : Cannot load s3 endpoints from \
               file {config} : {str(file_err)}')
@@ -49,14 +49,14 @@ def cli(session, profile, region, config):
 @pass_context
 def s3(session, chunk_size):
     """- AWS S3 Automation Commands."""
-    session.set_s3_session_context(Boto3S3SessionContext(chunk_size))
+    session.set_s3_session(S3SessionManager(session, chunk_size))
 
 
 @s3.command('list-buckets')
 @pass_context
 def list_s3_buckets(session):
     """List all S3 buckets."""
-    S3BucketManager(session).list_buckets()
+    S3BucketManager(session.get_s3_session()).list_buckets()
 
 
 @s3.command('list-bucket-objects')
@@ -64,7 +64,7 @@ def list_s3_buckets(session):
 @pass_context
 def list_s3_bucket_objects(session, name):
     """List all S3 bucket objects associated with bucket name."""
-    S3BucketManager(session).list_bucket_objects(name)
+    S3BucketManager(session.get_s3_session()).list_bucket_objects(name)
 
 
 @s3.command('setup-bucket')
@@ -84,7 +84,7 @@ def list_s3_bucket_objects(session, name):
 def s3_bucket_setup(session, name, policy_file, index_file,
                     index_name, error_file, error_name):
     """Set up a bucket for web hosting."""
-    url, err = S3BucketManager(session).\
+    url, err = S3BucketManager(session.get_s3_session()).\
         setup_bucket(name, policy_file,
                      index_file, index_name,
                      error_file, error_name)
@@ -107,7 +107,7 @@ def s3_bucket_sync(session, path, name, validate):
     sync files found in fs specified by 'fs_pathname' to bucket
     specified by 'bucket_name'.  optionally validate files (html only)
     """
-    url, err = S3BucketManager(session).\
+    url, err = S3BucketManager(session.get_s3_session()).\
         sync_fs_to_bucket(path, name, validate)
 
     if err:

@@ -1,43 +1,38 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-"""Boto3 session context."""
+"""Main Session Manager class."""
 
 import boto3
 
-try:
-    import boto3_helper
-except ModuleNotFoundError:
-    from . import boto3_helper
 
-
-class Boto3SessionContext():
-    """Boto3 Session Context Class."""
+class SessionManager():
+    """Session Manager Class."""
 
     def __init__(self, profile_name=None, region_name=None,
-                 region_config=None, s3_session_context=None):
-        """Initialize the Boto3 session context class."""
+                 region_config=None, s3_session=None):
+        """Initialize the session manager class."""
         if profile_name:
             self.init(profile_name, region_name,
-                      region_config, s3_session_context)
+                      region_config, s3_session)
         else:
-            self.s3_session = s3_session_context
+            self.s3_session = s3_session
             self.session = None
             self.region_config = None
 
     def init(self, profile_name, region_name=None,
-             region_config=None, s3_session_context=None):
+             region_config=None, s3_session=None):
         """Initialize the class with a new profile_name."""
         if region_name is None:
             self.session = boto3.Session(profile_name=profile_name)
         else:
             self.session = boto3.Session(profile_name=profile_name,
                                          region_name=region_name)
-        self.s3_session_context = s3_session_context
+        self.s3_session = s3_session
         self.region_config = region_config
 
     def get_session(self):
-        """Get boto3 session."""
+        """Get session."""
         return self.session
 
     def get_resource(self, resource_name):
@@ -58,17 +53,16 @@ class Boto3SessionContext():
         Check and see if region associated with session is us-east-1(default)
         """
         if not region:
-            return self.session.region_name == \
-                boto3_helper.get_default_region()
+            return self.session.region_name == self.get_default_region()
 
-        return region == boto3_helper.get_default_region()
+        return region == self.s3_session.get_session().get_default_region()
 
-    def set_s3_session_context(self, s3_session):
-        """Set the S3 session context."""
+    def set_s3_session(self, s3_session):
+        """Set the S3 session."""
         self.s3_session = s3_session
 
-    def get_s3_session_context(self):
-        """Get the S3 session context."""
+    def get_s3_session(self):
+        """Get the S3 session."""
         return self.s3_session
 
     def get_region_config(self):
@@ -78,6 +72,16 @@ class Boto3SessionContext():
     def set_region_config(self, region_config):
         """Set the AWS region map."""
         self.region_config = region_config
+
+    @staticmethod
+    def get_default_region():
+        """Get default region."""
+        return 'us-east-1'
+
+    @staticmethod
+    def get_client_error_code(err_response):
+        """Get client error code from the response."""
+        return err_response.response['Error']['Code']
 
 
 if __name__ == '__main__':

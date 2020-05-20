@@ -7,9 +7,9 @@ from botocore.exceptions import ClientError
 from boto3.s3.transfer import TransferConfig
 
 try:
+    from awsbot import util
+except ImportError:
     import util
-except ModuleNotFoundError:
-    from . import util
 
 
 class S3SessionManager():

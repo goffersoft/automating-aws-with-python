@@ -215,7 +215,7 @@ def md5digest(filename, chunksize=None):
 
 
 def get_file_path(path):
-    """Determine if path is within the webotron directory.
+    """Determine if path is within the awsbot directory.
 
     if input path is valid, return input path
     else

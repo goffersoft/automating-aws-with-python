@@ -5,10 +5,11 @@
 
 from pathlib import Path
 
+
 try:
+    from awsbot import util
+except ImportError:
     import util
-except ModuleNotFoundError:
-    from . import util
 
 
 class S3BucketManager():

@@ -6,9 +6,9 @@
 from collections import namedtuple
 
 try:
+    from awsbot import util
+except ImportError:
     import util
-except ModuleNotFoundError:
-    from . import util
 
 Endpoint = namedtuple('Endpont', ['name', 'endpoint', 'zone'])
 

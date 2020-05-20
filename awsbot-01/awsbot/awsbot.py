@@ -1,20 +1,20 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-"""cli entry points for the various webotron commands."""
+"""cli entry points for the various awsbot commands."""
 
 import click
 
 try:
+    from awsbot.region_config import RegionConfig
+    from awsbot.session import SessionManager
+    from awsbot.s3_session import S3SessionManager
+    from awsbot.s3_bucket import S3BucketManager
+except ImportError:
     from region_config import RegionConfig
     from session import SessionManager
     from s3_session import S3SessionManager
     from s3_bucket import S3BucketManager
-except ModuleNotFoundError:
-    from .region_config import RegionConfig
-    from .session import SessionManager
-    from .s3_session import S3SessionManager
-    from .s3_bucket import S3BucketManager
 
 
 pass_context = click.make_pass_decorator(SessionManager,

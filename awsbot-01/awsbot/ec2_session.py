@@ -28,6 +28,5 @@ class Ec2SessionManager():
         self.session = session
 
 
-
 if __name__ == '__main__':
     pass

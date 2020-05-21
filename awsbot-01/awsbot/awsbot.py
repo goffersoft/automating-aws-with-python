@@ -4,11 +4,13 @@
 """cli entry points for the various awsbot commands."""
 
 try:
-    from awsbot.awsbots3cli import s3
-    from awsbot.awsbotmaincli import cli
+    from awsbot.cli_main import cli
+    from awsbot.cli_s3 import s3
+    from awsbot.cli_r53 import r53
 except ImportError:
-    from awsbots3cli import s3
-    from awsbotmaincli import cli
+    from cli_main import cli
+    from cli_s3 import s3
+    from cli_r53 import r53
 
 
 def awsbot():
@@ -17,6 +19,7 @@ def awsbot():
     Add Sub-Commands to the main cli group
     """
     cli.add_command(s3)
+    cli.add_command(r53)
     cli()
 
 

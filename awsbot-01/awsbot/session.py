@@ -10,18 +10,22 @@ class SessionManager():
     """Session Manager Class."""
 
     def __init__(self, profile_name=None, region_name=None,
-                 region_config=None, s3_session=None):
+                 region_config=None, s3_session=None,
+                 r53_session=None):
         """Initialize the session manager class."""
         if profile_name:
             self.init(profile_name, region_name,
-                      region_config, s3_session)
+                      region_config, s3_session,
+                      r53_session)
         else:
-            self.s3_session = s3_session
             self.session = None
-            self.region_config = None
+            self.s3_session = s3_session
+            self.r53_session = r53_session
+            self.region_config = region_config
 
     def init(self, profile_name, region_name=None,
-             region_config=None, s3_session=None):
+             region_config=None, s3_session=None,
+             r53_session=None):
         """Initialize the class with a new profile_name."""
         if region_name is None:
             self.session = boto3.Session(profile_name=profile_name)
@@ -29,6 +33,7 @@ class SessionManager():
             self.session = boto3.Session(profile_name=profile_name,
                                          region_name=region_name)
         self.s3_session = s3_session
+        self.r53_session = r53_session
         self.region_config = region_config
 
     def get_session(self):
@@ -64,6 +69,14 @@ class SessionManager():
     def get_s3_session(self):
         """Get the S3 session."""
         return self.s3_session
+
+    def set_r53_session(self, r53_session):
+        """Set the route 53 session."""
+        self.r53_session = r53_session
+
+    def get_r53_session(self):
+        """Get the route 53 session."""
+        return self.r53_session
 
     def get_region_config(self):
         """Get AWS region map."""

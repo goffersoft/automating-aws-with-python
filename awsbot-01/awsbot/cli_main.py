@@ -7,10 +7,10 @@ import click
 
 try:
     from awsbot.region_config import RegionConfig
-    from awsbot.awsbotcliglobals import pass_context
+    from awsbot.cli_globals import pass_context
 except ImportError:
     from region_config import RegionConfig
-    from awsbotcliglobals import pass_context
+    from cli_globals import pass_context
 
 
 @click.group()

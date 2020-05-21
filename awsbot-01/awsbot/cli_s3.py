@@ -1,18 +1,18 @@
 #! /usr/bin/python
 # -*- coding:utf-8 -*-
 
-"""cli entry points for the various awsbot commands."""
+"""cli entry points for s3 awsbot commands."""
 
 import click
 
 try:
     from awsbot.s3_session import S3SessionManager
     from awsbot.s3_bucket import S3BucketManager
-    from awsbot.awsbotcliglobals import pass_context
+    from awsbot.cli_globals import pass_context
 except ImportError:
     from s3_session import S3SessionManager
     from s3_bucket import S3BucketManager
-    from awsbotcliglobals import pass_context
+    from cli_globals import pass_context
 
 
 @click.group()

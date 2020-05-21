@@ -1,11 +1,11 @@
 # automating-aws-with-python
 
-## webotron-01
+## awsbot-01
 
-Webotron-01 is a script that will sync a local directory to a s3 bucket and optionally confiure route53 and cloudfront as well.
+awsbot-01 is a script that will sync a local directory to a s3 bucket and optionally confiure route53 and cloudfront as well.
 
 ### Features
-Webotron has the following features 
+Awsbot has the following features 
 
 #### S3
     - list buckets
@@ -19,4 +19,5 @@ Webotron has the following features
            defaults used if none is provided
         3) enable web hosting on this bucket
     - sync web directory from filesystem with a s3 bucket 
-        
+#### R53
+    - TBD

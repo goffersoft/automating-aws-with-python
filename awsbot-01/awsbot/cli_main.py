@@ -22,7 +22,7 @@ except ImportError:
               help='region config csv file to use')
 @pass_context
 def cli(session, profile, region, config):
-    """Webotron - AWS Automation Tool."""
+    """Awsbot cli - AWS Automation Tool CLI entry point."""
     region_config = None
 
     try:

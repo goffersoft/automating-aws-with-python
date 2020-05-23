@@ -14,8 +14,9 @@ except ImportError:
 
 
 def awsbot():
-    """Initialize click cli.
+    """Initialize awsbot.
 
+    Configure click package
     Add Sub-Commands to the main cli group
     """
     cli.add_command(s3)

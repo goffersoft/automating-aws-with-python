@@ -14,10 +14,7 @@ from html5lib.html5parser import ParseError
 
 
 def get_file_as_string(filename):
-    """Get the contents of a file as a string.
-
-    raises the FileNotFoundException
-    """
+    """Get the contents of a file as a string."""
     try:
         fname, err = get_file_path(filename)
         if not err:
@@ -139,8 +136,11 @@ def walk_fs_tree(path,
     for node in path.iterdir():
         if node.is_dir():
             walk_fs_tree(node, pfunc, ignore_hidden_files, root)
-        elif node.is_file() and not node.parts[-1].startswith('.'):
-            pfunc(node, root)
+        elif node.is_file():
+            if ignore_hidden_files and node.parts[-1].startswith('.'):
+                continue
+            else:
+                pfunc(node, root)
 
 
 def get_content_type_from_filename(filename):

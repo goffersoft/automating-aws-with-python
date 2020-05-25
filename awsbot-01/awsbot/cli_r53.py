@@ -30,5 +30,19 @@ def list_hosted_zones(session):
         list_hosted_zones()
 
 
+@r53.command('list-record-sets')
+@click.argument('zone', default=None)
+@click.option('--type-filter', default=None,
+              help='filter by record type')
+@pass_context
+def list_resource_record_sets(session, zone, type_filter):
+    """List Resource Record Sets."""
+    ok, err = R53DomainManager(session.get_r53_session()).\
+        list_resource_record_sets(zone, type_filter)
+
+    if not ok:
+        print(str(err))
+
+
 if __name__ == '__main__':
     pass

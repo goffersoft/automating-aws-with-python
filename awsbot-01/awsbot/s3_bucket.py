@@ -71,8 +71,8 @@ class S3BucketManager():
                                         error_name)
         if not ok:
             self.s3_session.s3_bucket_cleanup(name, bucket_res)
-            return None, f'Cannot enable web hosting \
-                           on bucket : {name} : {err}'
+            return None, f'Cannot enable web hosting{""}' +\
+                         f' on bucket : {name} : {err}'
 
         return self.s3_session.get_s3_bucket_url(name)
 

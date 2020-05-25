@@ -19,6 +19,17 @@ class R53SessionManager():
         """Get route 53 client."""
         return self.get_r53_client().list_hosted_zones_by_name()
 
+    def get_r53_paginator(self, name):
+        """Get route 53 paginator."""
+        try:
+            return self.get_r53_client().get_paginator(name), None
+        except KeyError as key_error:
+            return None, str(key_error)
+
+    def get_r53_list_record_set_paginator(self):
+        """Get route 53 'list_resource_record_sets' paginator."""
+        return self.get_r53_paginator('list_resource_record_sets')[0]
+
 
 if __name__ == '__main__':
     pass

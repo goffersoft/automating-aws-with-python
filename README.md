@@ -20,4 +20,5 @@ Awsbot has the following features
         3) enable web hosting on this bucket
     - sync web directory from filesystem with a s3 bucket 
 #### R53
-    - list_hosted_zones
+    - list-hosted-zones
+    - list-record-sets

@@ -96,6 +96,37 @@ class SessionManager():
         """Get client error code from the response."""
         return err_response.response['Error']['Code']
 
+    @staticmethod
+    def get_response_code(client_response):
+        """Get client http response code."""
+        return client_response['ResponseMetadata']['HTTPStatusCode']
+
+    @staticmethod
+    def is_ok_response(client_response):
+        """Get client http response code.
+
+        Return True, hcode if response code is
+        between 200 and 299
+        Return Falsei otherwise
+        """
+        hcode = SessionManager.get_response_code(client_response)
+        if hcode in range(200, 300):
+            return True, hcode
+
+        return False, hcode
+
+    @staticmethod
+    def is_error_response(client_response):
+        """Get client http response code.
+
+        Return False, rcode if response code is
+        between 200 and 299
+        Return True, rcode otherwise
+        """
+        status, hcode = SessionManager.is_ok_response(client_response)
+
+        return not status, hcode
+
 
 if __name__ == '__main__':
     pass

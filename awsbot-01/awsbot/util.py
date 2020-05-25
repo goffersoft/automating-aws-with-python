@@ -139,8 +139,7 @@ def walk_fs_tree(path,
         elif node.is_file():
             if ignore_hidden_files and node.parts[-1].startswith('.'):
                 continue
-            else:
-                pfunc(node, root)
+            pfunc(node, root)
 
 
 def get_content_type_from_filename(filename):

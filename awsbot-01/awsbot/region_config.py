@@ -43,21 +43,21 @@ class RegionConfig():
             if not self.is_valid_region(region):
                 return None, f'Invalid Region : {region}'
 
-            return self.region_endpoints[region].endpoint, None
+            return self.region_endpoints[region].endpoint.strip(), None
 
         def get_region_name(self, region):
             """Get name associated with region."""
             if not self.is_valid_region(region):
                 return None, f'Invalid Region : {region}'
 
-            return self.region_endpoints[region].name, None
+            return self.region_endpoints[region].name.strip(), None
 
         def get_zone(self, region):
             """Get route53 zone id associated with region."""
             if not self.is_valid_region(region):
                 return None, f'Invalid Region : {region}'
 
-            return self.region_endpoints[region].zone, None
+            return self.region_endpoints[region].zone.strip(), None
 
     instance = None
 

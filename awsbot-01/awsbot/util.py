@@ -3,6 +3,7 @@
 
 """Utility functions."""
 
+from uuid import uuid4
 import csv
 import mimetypes
 import json
@@ -233,6 +234,11 @@ def get_file_path(path):
         return str(node), None
 
     return None, f'Invalid path name : {path}'
+
+
+def getuuid():
+    """Return a randomly generated UUID4 object."""
+    return uuid4()
 
 
 if __name__ == '__main__':

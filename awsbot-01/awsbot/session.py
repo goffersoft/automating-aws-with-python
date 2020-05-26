@@ -97,8 +97,8 @@ class SessionManager():
         return err_response.response['Error']['Code']
 
     @staticmethod
-    def get_response_code(client_response):
-        """Get client http response code."""
+    def get_client_http_status_code(client_response):
+        """Get client http status code."""
         return client_response['ResponseMetadata']['HTTPStatusCode']
 
     @staticmethod
@@ -109,7 +109,7 @@ class SessionManager():
         between 200 and 299
         Return Falsei otherwise
         """
-        hcode = SessionManager.get_response_code(client_response)
+        hcode = SessionManager.get_client_http_status_code(client_response)
         if hcode in range(200, 300):
             return True, hcode
 

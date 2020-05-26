@@ -22,3 +22,4 @@ Awsbot has the following features
 #### R53
     - list-hosted-zones
     - list-record-sets
+    - setup-s3-domain

@@ -118,14 +118,17 @@ class S3SessionManager():
                             meta.client.\
                             get_bucket_location(Bucket=bucket_name)
             return response_dict['LocationConstraint'] or \
-                self.session.get_default_region()
+                self.session.get_default_region(), None
         except ClientError as client_error:
             return None, str(client_error)
 
     def get_s3_bucket_url(self, bucket_name):
         """Get S3 bucket url."""
         try:
-            region_name = self.get_region_name_from_s3_bucket(bucket_name)
+            region_name, err = self.get_region_name_from_s3_bucket(bucket_name)
+            if err:
+                return None, err
+
             endpoint, err = self.session.get_region_config().\
                 get_endpoint(region_name)
             if err:
@@ -202,14 +205,16 @@ class S3SessionManager():
             policy, err = \
                 self.validate_and_get_s3_bucket_policy_as_string(name, policy)
 
-            if err is not None:
+            if err:
                 return None, err
 
             bucket_region = self.session.get_region_name()
 
             if self.is_valid_s3_bucket(name):
-                bucket_region =\
+                bucket_region, err =\
                     self.get_region_name_from_s3_bucket(name)
+                if err:
+                    return None, err
 
             if self.session.is_default_region(bucket_region):
                 bucket =\

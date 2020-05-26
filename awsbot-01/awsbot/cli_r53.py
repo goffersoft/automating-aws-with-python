@@ -8,10 +8,12 @@ import click
 try:
     from awsbot.r53_session import R53SessionManager
     from awsbot.r53_domain import R53DomainManager
+    from awsbot.s3_session import S3SessionManager
     from awsbot.cli_globals import pass_context
 except ImportError:
     from r53_session import R53SessionManager
     from r53_domain import R53DomainManager
+    from s3_session import S3SessionManager
     from cli_globals import pass_context
 
 
@@ -41,6 +43,34 @@ def list_resource_record_sets(session, zone, type_filter):
         list_resource_record_sets(zone, type_filter)
 
     if not ok:
+        print(str(err))
+
+
+@r53.command('setup-s3-domain')
+@click.argument('domain_name', default=None)
+@pass_context
+def setup_s3_domain(session, domain_name):
+    """Create S3 domain."""
+    bucket_name = domain_name
+
+    if session.get_s3_session():
+        s3_session = session.get_s3_session()
+    else:
+        s3_session = S3SessionManager(session)
+
+    bucket_region, err = s3_session.\
+        get_region_name_from_s3_bucket(bucket_name)
+
+    if err:
+        print(err)
+        return
+
+    ok, err = R53DomainManager(session.get_r53_session()).\
+        create_s3_domain_record(domain_name, bucket_region)
+
+    if ok:
+        print(f'Successfully created S3 Domain for bucket : {domain_name}')
+    else:
         print(str(err))
 
 

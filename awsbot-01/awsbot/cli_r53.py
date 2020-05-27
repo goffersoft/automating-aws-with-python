@@ -51,11 +51,29 @@ def list_resource_record_sets(session, zone, type_filter):
 @pass_context
 def setup_s3_domain(session, domain_name):
     """Create S3 domain."""
+    helpdoc = """
+                  Typically takes upto 10 minutes before
+                  the url starts to work
+
+                  if the hosted zone was also newly creted
+                  as part of the domain setup and the url
+                  doesnot work after 10 minutes or so,
+                  then please read the following carefully
+                  and act accordingly:
+
+                      Before the Domain Name System will start
+                      to route queries for this domain to Route 53
+                      name servers, you must update the name server
+                      records either with the current DNS service
+                      or with the registrar for the domain,
+                      as applicable.
+
+               """
+
     bucket_name = domain_name
 
-    if session.get_s3_session():
-        s3_session = session.get_s3_session()
-    else:
+    s3_session = session.get_s3_session()
+    if not s3_session:
         s3_session = S3SessionManager(session)
 
     bucket_region, err = s3_session.\
@@ -69,7 +87,10 @@ def setup_s3_domain(session, domain_name):
         create_s3_domain_record(domain_name, bucket_region)
 
     if ok:
-        print(f'Successfully created S3 Domain for bucket : {domain_name}')
+        print('Domain Creation Successful!')
+        print()
+        print(f's3 bucket url : http://{domain_name}')
+        print(helpdoc)
     else:
         print(str(err))
 

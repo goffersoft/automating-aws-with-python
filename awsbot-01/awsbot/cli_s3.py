@@ -72,7 +72,8 @@ def s3_bucket_setup(session, name, policy_file, index_file,
 @s3.command('sync-bucket')
 @click.argument('path', default=None, type=click.Path(exists=True))
 @click.argument('name', default=None)
-@click.option('--validate', default=False, is_flag=True)
+@click.option('--validate', default=False, is_flag=True,
+              help='validates html file syntax before syncing with s3 bucket')
 @pass_context
 def s3_bucket_sync(session, path, name, validate):
     """Sync filesystem to s3 bucket.

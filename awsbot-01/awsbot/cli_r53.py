@@ -47,10 +47,18 @@ def list_resource_record_sets(session, zone, type_filter):
 
 
 @r53.command('setup-s3-domain')
-@click.argument('domain_name', default=None)
+@click.argument('bucket_name', default=None)
 @pass_context
-def setup_s3_domain(session, domain_name):
-    """Create S3 domain."""
+def setup_s3_domain(session, bucket_name):
+    """Create S3 domain.
+
+    The bucket should already exists in AWS S3
+    (use the s3 cli commands to setup/sync s3 buckets)
+    The bucket name is the domain name for S3 buckets
+    The s3 bucket naming convention should be
+
+    <bucketname>[.<sub-domain>].<registerd-domain>
+    """
     helpdoc = """
                   Typically takes upto 10 minutes before
                   the url starts to work
@@ -70,7 +78,7 @@ def setup_s3_domain(session, domain_name):
 
                """
 
-    bucket_name = domain_name
+    domain_name = bucket_name
 
     s3_session = session.get_s3_session()
     if not s3_session:

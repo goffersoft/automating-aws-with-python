@@ -224,7 +224,7 @@ def get_file_path(path):
         3) concatenate parent with 'path'
         4) if valid path, return this new path
     """
-    node = Path(path)
+    node = Path(path).expanduser().resolve()
     if node.exists():
         return path, None
 

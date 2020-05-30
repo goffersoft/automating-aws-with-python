@@ -241,5 +241,15 @@ def getuuid():
     return uuid4()
 
 
+def str_to_list(input_str, valid_values, delimiter=','):
+    """Convert a string to apython list."""
+    input_list = input_str.split(delimiter)
+    for item in input_list:
+        if item not in valid_values:
+            return None, f'{item} not in list of ' + \
+                f'supported values : {valid_values}'
+    return input_list, None
+
+
 if __name__ == '__main__':
     pass

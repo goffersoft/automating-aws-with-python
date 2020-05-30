@@ -7,10 +7,12 @@ try:
     from awsbot.cli_main import cli
     from awsbot.cli_s3 import s3
     from awsbot.cli_r53 import r53
+    from awsbot.cli_acm import acm
 except ImportError:
     from cli_main import cli
     from cli_s3 import s3
     from cli_r53 import r53
+    from cli_acm import acm
 
 
 def awsbot():
@@ -21,6 +23,7 @@ def awsbot():
     """
     cli.add_command(s3)
     cli.add_command(r53)
+    cli.add_command(acm)
     cli()
 
 

@@ -28,8 +28,8 @@ def cli(session, profile, region, config):
     try:
         region_config = RegionConfig(config)
     except FileNotFoundError as file_err:
-        print(f'WARNING : Cannot load s3 endpoints from \
-              file {config} : {str(file_err)}')
+        print('WARNING : Cannot load s3 endpoints' +
+              f'from file {config} : {str(file_err)}')
 
     session.init(profile, region, region_config)
 

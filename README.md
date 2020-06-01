@@ -23,7 +23,11 @@ Awsbot has the following features
     - list-record-sets   List Resource Record Sets.
     - setup-s3-domain    Create S3 domain.
 #### ACM - Certificate Manager 
-    - find-cert     Find cert that matches domain name.
-    - cert-details  Get cert details.
-    - cert-keys     Get cert keys.
-    - list-certs    List certs.
+    - find-cert         Find cert that matches domain name.
+    - get-cert-details  Get cert details.
+    - list-cert-keys    Get cert keys.
+    - list-certs        List certs.
+#### Cloud Front
+    - list-all-distributions  List all distributions.
+    - list-distribution       List distribution matching domain name.
+    - setup-s3-cdn            Create s3 cloud front distribution.

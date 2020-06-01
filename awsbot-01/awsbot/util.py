@@ -242,7 +242,7 @@ def getuuid():
 
 
 def str_to_list(input_str, valid_values, delimiter=','):
-    """Convert a string to apython list."""
+    """Convert a string to a list."""
     input_list = input_str.split(delimiter)
     for item in input_list:
         if item not in valid_values:

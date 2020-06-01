@@ -76,14 +76,14 @@ def list_cert_keys(session, cert_arn):
             print(f'{i+1:>2} : {key}')
 
 
-@acm.command('cert-details')
+@acm.command('get-cert-details')
 @click.argument('cert-arn')
 @click.option('--cert-filter', default=None,
               help='filter by any primary key '
               'in the returned json blob '
               'describing the cert')
 @pass_context
-def cert_details(session, cert_arn, cert_filter):
+def get_cert_details(session, cert_arn, cert_filter):
     """Get cert details.
 
     optionally, fiter by any key in the json

@@ -47,6 +47,11 @@ class R53SessionManager():
                 yield zone
 
     @staticmethod
+    def get_default_cf_zone_id():
+        """Get default cloud front zoneid."""
+        return 'Z2FDTNDATAQYW2'
+
+    @staticmethod
     def get_zone_name_from_domain(domain_name):
         """Get zone name from domain name."""
         domain_parts = domain_name.split('.')

@@ -65,41 +65,32 @@ class R53DomainManager():
                 return zone
         return None
 
-    def create_hosted_zone(self, zone_name):
+    def create_hosted_zone(self, hosted_zone_name):
         """Create hosted zone."""
         zone = self.r53_session.get_r53_client().\
-            create_hosted_zone(Name=zone_name,
+            create_hosted_zone(Name=hosted_zone_name,
                                CallerReference=str(util.getuuid()))
         return zone['HostedZone']
 
-    def create_s3_domain_record(self, domain_name, bucket_region):
-        """Create S3 domain record."""
+    def create_alias_domain_record(self, domain_name,
+                                   alias_zone_id,
+                                   alias_dns_name):
+        """Create alias record."""
         try:
-            if not self.r53_session.get_session().\
-                                    get_region_config().\
-                                    is_valid_region(bucket_region):
-                return False, \
-                       f'bucket region : {bucket_region} : not supported'
-
-            zone_id, _ = self.r53_session.get_session().\
-                get_region_config().get_zone(bucket_region)
-            endpoint, _ = self.r53_session.get_session().\
-                get_region_config().get_endpoint(bucket_region)
-
-            zone_name, err = \
+            hosted_zone_name, err = \
                 self.r53_session.\
                 get_zone_name_from_domain(domain_name)
             if err:
                 return False, err
 
             zone = self.find_hosted_zone(domain_name) or \
-                self.create_hosted_zone(zone_name)
+                self.create_hosted_zone(hosted_zone_name)
 
             change_batch = self.r53_session.\
                 create_resource_record_set_config(
                     rrset_domain_name=domain_name,
-                    rrset_alias_zone_id=zone_id,
-                    rrset_alias_dns_name=endpoint)
+                    rrset_alias_zone_id=alias_zone_id,
+                    rrset_alias_dns_name=alias_dns_name)
 
             self.r53_session.get_r53_client().\
                 change_resource_record_sets(
@@ -109,6 +100,33 @@ class R53DomainManager():
             return True, None
         except ClientError as client_err:
             return False, str(client_err)
+
+    def create_s3_domain_record(self, domain_name, bucket_region):
+        """Create S3 domain record."""
+        if not self.r53_session.get_session().\
+                get_region_config().\
+                is_valid_region(bucket_region):
+            return False, \
+                   f'bucket region : {bucket_region} : not supported'
+
+        bucket_zone_id, _ = self.r53_session.get_session().\
+            get_region_config().get_zone(bucket_region)
+        endpoint, _ = self.r53_session.get_session().\
+            get_region_config().get_endpoint(bucket_region)
+
+        return self.create_alias_domain_record(domain_name,
+                                               bucket_zone_id,
+                                               endpoint)
+
+    def create_cf_domain_record(self, domain_name, cf_domain_name,
+                                cf_zone_id=None):
+        """Create cloud front domain record."""
+        if not cf_zone_id:
+            cf_zone_id = self.r53_session.get_default_cf_zone_id()
+
+        return self.create_alias_domain_record(domain_name,
+                                               cf_zone_id,
+                                               cf_domain_name)
 
 
 if __name__ == '__main__':

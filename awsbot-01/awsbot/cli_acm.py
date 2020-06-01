@@ -61,10 +61,10 @@ def list_certs(session, status_filter):
         print(err)
 
 
-@acm.command('cert-keys')
+@acm.command('list-cert-keys')
 @click.argument('cert-arn')
 @pass_context
-def cert_keys(session, cert_arn):
+def list_cert_keys(session, cert_arn):
     """Get cert keys."""
     cert_keys, err = ACMCertificateManager(session.get_acm_session()).\
         get_cert_keys(cert_arn)

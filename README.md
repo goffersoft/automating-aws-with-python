@@ -8,7 +8,7 @@ awsbot-01 is a script that will sync a local directory to a s3 bucket and option
 Awsbot has the following features 
 
 #### Introduction
-
+```
 Usage: awsbot.py [OPTIONS] COMMAND [ARGS]...
 
   Awsbot cli - AWS Automation Tool CLI entry point.
@@ -25,7 +25,7 @@ Commands:
   ec2  - AWS EC2 Automation Commands.
   r53  - AWS Route 53 Automation Commands.
   s3   - AWS S3 Automation Commands.
-
+```
 #### S3
 
     - list-bucket-objects  List S3 bucket objects
@@ -59,7 +59,7 @@ Commands:
     - setup-s3-cdn            Create s3 cloud front distribution.
 
 #### EC2
-
+```
 Usage: awsbot.py ec2 [OPTIONS] COMMAND [ARGS]...
 
   - AWS EC2 Automation Commands.
@@ -80,7 +80,7 @@ Options:
 
 Commands:
   instance  - AWS EC2 instances Automation Commands.
-
+```
 ##### EC2 Instance 
 
     - list   List EC2 instances.

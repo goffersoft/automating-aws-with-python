@@ -9,9 +9,9 @@ Awsbot has the following features
 
 #### Introduction
 ```
-Usage: awsbot.py [OPTIONS] COMMAND [ARGS]...
+Usage: awsbot [OPTIONS] COMMAND [ARGS]...
 
-  Awsbot cli - AWS Automation Tool CLI entry point.
+  Awsbot cli - AWS Automation Tool CLI.
 
 Options:
   --profile TEXT  profile name to use while creatting a boto3 session
@@ -60,7 +60,7 @@ Commands:
 
 #### EC2
 ```
-Usage: awsbot.py ec2 [OPTIONS] COMMAND [ARGS]...
+Usage: awsbot ec2 [OPTIONS] COMMAND [ARGS]...
 
   - AWS EC2 Automation Commands.
 
@@ -69,17 +69,6 @@ Options:
 
 Commands:
   instance  AWS EC2 instances Automation Commands.
-(awsbot-01) bash-3.2$ vi cli_ec2_instance.py
-(awsbot-01) bash-3.2$ python awsbot.py ec2
-Usage: awsbot.py ec2 [OPTIONS] COMMAND [ARGS]...
-
-  - AWS EC2 Automation Commands.
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  instance  - AWS EC2 instances Automation Commands.
 ```
 ##### EC2 Instance 
 

@@ -1,12 +1,5 @@
 # automating-aws-with-python
 
-## awsbot-01
-
-awsbot-01 is a script that will sync a local directory to a s3 bucket and optionally confiure route53 and cloudfront as well.
-
-### Features
-Awsbot has the following features 
-
 #### Introduction
 ```
 Usage: awsbot [OPTIONS] COMMAND [ARGS]...

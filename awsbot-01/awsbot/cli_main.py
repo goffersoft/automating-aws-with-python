@@ -15,7 +15,7 @@ except ImportError:
 
 @click.group()
 @click.option('--profile', default='python_automation',
-              help='profile name to use while creatting a boto3 session')
+              help='profile name to use while creating a boto3 session')
 @click.option('--region', default=None,
               help='overide the region name in the aws profile')
 @click.option('--config', default='config/region.csv',

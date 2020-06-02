@@ -18,7 +18,7 @@ except ImportError:
 @click.group()
 @pass_context
 def acm(session):
-    """- AWS Cert. Manager Automation Commands."""
+    """- AWS ACM Automation Commands."""
     session.set_acm_session(ACMSessionManager(session))
 
 

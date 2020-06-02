@@ -12,13 +12,13 @@ class SessionManager():
     def __init__(self, profile_name=None, region_name=None,
                  region_config=None, s3_session=None,
                  r53_session=None, acm_session=None,
-                 cf_session=None):
+                 cf_session=None, ec2_session=None):
         """Initialize the session manager class."""
         if profile_name:
             self.init(profile_name, region_name,
                       region_config, s3_session,
                       r53_session, acm_session,
-                      cf_session)
+                      cf_session, ec2_session)
         else:
             self.session = None
             self.region_config = region_config
@@ -26,11 +26,12 @@ class SessionManager():
             self.r53_session = r53_session
             self.acm_session = acm_session
             self.cf_session = cf_session
+            self.ec2_session = ec2_session
 
     def init(self, profile_name, region_name=None,
              region_config=None, s3_session=None,
              r53_session=None, acm_session=None,
-             cf_session=None):
+             cf_session=None, ec2_session=None):
         """Initialize the class with a new profile_name."""
         if region_name is None:
             self.session = boto3.Session(profile_name=profile_name)
@@ -42,6 +43,7 @@ class SessionManager():
         self.r53_session = r53_session
         self.acm_session = acm_session
         self.cf_session = cf_session
+        self.ec2_session = ec2_session
 
     def get_session(self):
         """Get session."""
@@ -104,6 +106,14 @@ class SessionManager():
     def get_cf_session(self):
         """Get the cloud front session."""
         return self.cf_session
+
+    def set_ec2_session(self, ec2_session):
+        """Set the EC2 session."""
+        self.ec2_session = ec2_session
+
+    def get_ec2_session(self):
+        """Get the EC2 session."""
+        return self.ec2_session
 
     def get_region_config(self):
         """Get AWS region map."""

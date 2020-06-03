@@ -11,7 +11,7 @@ except ImportError:
     from session import SessionManager
 
 
-pass_context = click.make_pass_decorator(SessionManager,
+cli_context = click.make_pass_decorator(SessionManager,
                                          ensure=True)
 
 

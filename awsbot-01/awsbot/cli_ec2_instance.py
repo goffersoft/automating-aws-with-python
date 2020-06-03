@@ -6,15 +6,15 @@
 import click
 
 try:
-    from awsbot.cli_globals import pass_context
+    from awsbot.cli_context import cli_context
     from awsbot.ec2_instance import EC2InstanceManager
 except ImportError:
-    from cli_globals import pass_context
+    from cli_context import cli_context
     from ec2_instance import EC2InstanceManager
 
 
 @click.group('instance')
-@pass_context
+@cli_context
 def ec2_instance(session):
     """- AWS EC2 instances Automation Commands."""
     pass
@@ -27,7 +27,7 @@ def ec2_instance(session):
 @click.option('--project-name', default=None,
               help='print all instances for '
                    'project tag:Project:<name>')
-@pass_context
+@cli_context
 def list_instances(session, instances, project_name):
     """List EC2 instances."""
     ok, err = EC2InstanceManager(session.get_ec2_session()).\
@@ -45,7 +45,7 @@ def list_instances(session, instances, project_name):
               help='start all ec2 instances for all projects')
 @click.option('--project-name', default=None,
               help='start all instances for project tag:Project:<name>')
-@pass_context
+@cli_context
 def start_instances(session, instances, force, project_name):
     """Start EC2 instances."""
     if not force and project_name is None:
@@ -74,7 +74,7 @@ def start_instances(session, instances, force, project_name):
               help='stop all ec2 instances for all projects')
 @click.option('--project-name', default=None,
               help='stop all instances for project tag:Project:<name>')
-@pass_context
+@cli_context
 def stop_instances(session, instances, force, project_name):
     """Stop EC2 instances."""
     if not force and project_name is None:
@@ -103,7 +103,7 @@ def stop_instances(session, instances, force, project_name):
               help='reboot all ec2 instances for all projects')
 @click.option('--project-name', default=None,
               help='reboot all instances for project tag:Project:<name>')
-@pass_context
+@cli_context
 def reboot_instances(session, instances, force, project_name):
     """Reboot EC2 instances."""
     if not force and project_name is None:

@@ -8,15 +8,15 @@ import click
 try:
     from awsbot.acm_session import ACMSessionManager
     from awsbot.acm_cert import ACMCertificateManager
-    from awsbot.cli_globals import pass_context
+    from awsbot.cli_context import cli_context
 except ImportError:
     from acm_session import ACMSessionManager
     from acm_cert import ACMCertificateManager
-    from cli_globals import pass_context
+    from cli_context import cli_context
 
 
 @click.group()
-@pass_context
+@cli_context
 def acm(session):
     """- AWS ACM Automation Commands."""
     session.set_acm_session(ACMSessionManager(session))
@@ -24,7 +24,7 @@ def acm(session):
 
 @acm.command('find-cert')
 @click.argument('domain-name')
-@pass_context
+@cli_context
 def find_cert(session, domain_name):
     """Find cert that matches domain name."""
     cert, err = ACMCertificateManager(session.get_acm_session()).\
@@ -45,7 +45,7 @@ def find_cert(session, domain_name):
               'PENDING_VALIDATION, '
               'EXPIRED, INACTIVE, '
               'ISSUED, FAILED, REVOKED')
-@pass_context
+@cli_context
 def list_certs(session, status_filter):
     """List certs.
 
@@ -63,7 +63,7 @@ def list_certs(session, status_filter):
 
 @acm.command('list-cert-keys')
 @click.argument('cert-arn')
-@pass_context
+@cli_context
 def list_cert_keys(session, cert_arn):
     """Get cert keys."""
     cert_keys, err = ACMCertificateManager(session.get_acm_session()).\
@@ -82,7 +82,7 @@ def list_cert_keys(session, cert_arn):
               help='filter by any primary key '
               'in the returned json blob '
               'describing the cert')
-@pass_context
+@cli_context
 def get_cert_details(session, cert_arn, cert_filter):
     """Get cert details.
 

@@ -12,7 +12,7 @@ try:
     from awsbot.r53_domain import R53DomainManager
     from awsbot.acm_session import ACMSessionManager
     from awsbot.acm_cert import ACMCertificateManager
-    from awsbot.cli_globals import pass_context
+    from awsbot.cli_context import cli_context
 except ImportError:
     from cf_session import CFSessionManager
     from cf_distribution import CFDistributionManager
@@ -20,18 +20,18 @@ except ImportError:
     from r53_domain import R53DomainManager
     from acm_session import ACMSessionManager
     from acm_cert import ACMCertificateManager
-    from cli_globals import pass_context
+    from cli_context import cli_context
 
 
 @click.group()
-@pass_context
+@cli_context
 def cf(session):
     """- AWS Cloud Front Automation Commands."""
     session.set_cf_session(CFSessionManager(session))
 
 
 @cf.command('list-all-distributions')
-@pass_context
+@cli_context
 def list_all_distributions(session):
     """List all distributions."""
     err = CFDistributionManager(session.get_cf_session()).\
@@ -43,7 +43,7 @@ def list_all_distributions(session):
 
 @cf.command('list-distribution')
 @click.argument('domain-name')
-@pass_context
+@cli_context
 def list_distribution(session, domain_name):
     """List distribution matching domain name."""
     err = CFDistributionManager(session.get_cf_session()).\
@@ -62,7 +62,7 @@ def list_distribution(session, domain_name):
 @click.option('--no-wait', default=False, is_flag=True,
               help='returns immediately instead of waiting for '
                    'the cloud front distribution to be deployed')
-@pass_context
+@cli_context
 def setup_s3_cdn(session, domain_name, bucket_name, root_object, no_wait):
     """Create s3 cloud front distribution.
 

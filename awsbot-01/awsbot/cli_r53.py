@@ -9,23 +9,23 @@ try:
     from awsbot.r53_session import R53SessionManager
     from awsbot.r53_domain import R53DomainManager
     from awsbot.s3_session import S3SessionManager
-    from awsbot.cli_globals import pass_context
+    from awsbot.cli_context import cli_context
 except ImportError:
     from r53_session import R53SessionManager
     from r53_domain import R53DomainManager
     from s3_session import S3SessionManager
-    from cli_globals import pass_context
+    from cli_context import cli_context
 
 
 @click.group()
-@pass_context
+@cli_context
 def r53(session):
     """- AWS Route 53 Automation Commands."""
     session.set_r53_session(R53SessionManager(session))
 
 
 @r53.command('list-hosted-zones')
-@pass_context
+@cli_context
 def list_hosted_zones(session):
     """List hosted zones."""
     R53DomainManager(session.get_r53_session()).\
@@ -36,7 +36,7 @@ def list_hosted_zones(session):
 @click.argument('zone', default=None)
 @click.option('--type-filter', default=None,
               help='filter by record type')
-@pass_context
+@cli_context
 def list_resource_record_sets(session, zone, type_filter):
     """List Resource Record Sets."""
     ok, err = R53DomainManager(session.get_r53_session()).\
@@ -48,7 +48,7 @@ def list_resource_record_sets(session, zone, type_filter):
 
 @r53.command('setup-s3-domain')
 @click.argument('bucket_name', default=None)
-@pass_context
+@cli_context
 def setup_s3_domain(session, bucket_name):
     """Create S3 domain.
 

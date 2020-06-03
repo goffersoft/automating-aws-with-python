@@ -7,10 +7,10 @@ import click
 
 try:
     from awsbot.region_config import RegionConfig
-    from awsbot.cli_globals import pass_context
+    from awsbot.cli_context import cli_context
 except ImportError:
     from region_config import RegionConfig
-    from cli_globals import pass_context
+    from cli_context import cli_context
 
 
 @click.group()
@@ -20,7 +20,7 @@ except ImportError:
               help='overide the region name in the aws profile')
 @click.option('--config', default='config/region.csv',
               help='region config csv file to use')
-@pass_context
+@cli_context
 def cli(session, profile, region, config):
     """Awsbot cli - AWS Automation Tool CLI."""
     region_config = None

@@ -8,25 +8,25 @@ import click
 try:
     from awsbot.s3_session import S3SessionManager
     from awsbot.s3_bucket import S3BucketManager
-    from awsbot.cli_globals import pass_context
+    from awsbot.cli_context import cli_context
 except ImportError:
     from s3_session import S3SessionManager
     from s3_bucket import S3BucketManager
-    from cli_globals import pass_context
+    from cli_context import cli_context
 
 
 @click.group()
 @click.option('--chunk-size',
               default=8*1024*1024, type=click.INT,
               help='default s3 transfer chuck size')
-@pass_context
+@cli_context
 def s3(session, chunk_size):
     """- AWS S3 Automation Commands."""
     session.set_s3_session(S3SessionManager(session, chunk_size))
 
 
 @s3.command('list-buckets')
-@pass_context
+@cli_context
 def list_s3_buckets(session):
     """List all S3 buckets."""
     S3BucketManager(session.get_s3_session()).list_buckets()
@@ -34,7 +34,7 @@ def list_s3_buckets(session):
 
 @s3.command('list-bucket-objects')
 @click.argument('name', default=None)
-@pass_context
+@cli_context
 def list_s3_bucket_objects(session, name):
     """List all S3 bucket objects associated with bucket name."""
     S3BucketManager(session.get_s3_session()).list_bucket_objects(name)
@@ -53,7 +53,7 @@ def list_s3_bucket_objects(session, name):
               help='filename(contains a html document) or a html string')
 @click.option('--error_name', default='error.html',
               help='name to use for the error s3 object')
-@pass_context
+@cli_context
 def s3_bucket_setup(session, name, policy_file, index_file,
                     index_name, error_file, error_name):
     """Set up a bucket for web hosting."""
@@ -74,7 +74,7 @@ def s3_bucket_setup(session, name, policy_file, index_file,
 @click.argument('name', default=None)
 @click.option('--validate', default=False, is_flag=True,
               help='validates html file syntax before syncing with s3 bucket')
-@pass_context
+@cli_context
 def s3_bucket_sync(session, path, name, validate):
     """Sync filesystem to s3 bucket.
 

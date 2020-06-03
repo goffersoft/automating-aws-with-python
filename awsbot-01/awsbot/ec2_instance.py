@@ -13,14 +13,14 @@ class EC2InstanceManager():
         """Initialize EC2 instance Manager Class."""
         self.ec2_session = ec2_session
 
-    def list_instances(self, instances, project_name, pfunc=None):
+    def list_instances(self, instance_ids, project_name, pfunc=None):
         """Get instances associated with resource.
 
         Conditionally filter by project name
         and/or instanceIds
         """
         def default_print(inst):
-            tags = {tag['Key']: tag['Value'] for tag in inst.tags or []}
+            tags = self.ec2_session.get_instance_tags(inst)
             print(','.join((inst.id,
                             inst.instance_type,
                             inst.public_dns_name,
@@ -33,7 +33,7 @@ class EC2InstanceManager():
 
         try:
             for inst in self.ec2_session.\
-                    get_instances(instances, project_name):
+                    get_instances(instance_ids, project_name):
                 pfunc(inst)
 
             return True, None
@@ -86,12 +86,12 @@ class EC2InstanceManager():
             return False, \
                 f'couldnot start {instance.id} : {str(client_err)}'
 
-    def start_ec2_instances(self, instances, project_name, pfunc=None):
+    def start_ec2_instances(self, instance_ids, project_name, pfunc=None):
         """Start EC2 instances."""
         err_list = []
         ret_val = False
         for inst in self.ec2_session.\
-                get_instances(instances, project_name):
+                get_instances(instance_ids, project_name):
             ok, err = self.start_ec2_instance(inst, False, pfunc)
 
             if not ok:
@@ -104,12 +104,12 @@ class EC2InstanceManager():
 
         return ret_val, err_list
 
-    def stop_ec2_instances(self, instances, project_name, pfunc=None):
+    def stop_ec2_instances(self, instance_ids, project_name, pfunc=None):
         """Stop EC2 instances."""
         err_list = []
         ret_val = False
         for inst in self.ec2_session.\
-                get_instances(instances, project_name):
+                get_instances(instance_ids, project_name):
             ok, err = self.stop_ec2_instance(inst, False, pfunc)
             if not ok:
                 err_list.append(err)
@@ -121,12 +121,12 @@ class EC2InstanceManager():
 
         return ret_val, err_list
 
-    def reboot_ec2_instances(self, instances, project_name, pfunc=None):
+    def reboot_ec2_instances(self, instance_ids, project_name, pfunc=None):
         """Reboot EC2 Instances."""
         err_list = []
         ret_val = False
         for inst in self.ec2_session.\
-                get_instances(instances, project_name):
+                get_instances(instance_ids, project_name):
             ok, err = self.stop_ec2_instance(inst, True, pfunc)
             if not ok:
                 err_list.append(err)

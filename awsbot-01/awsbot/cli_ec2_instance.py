@@ -22,7 +22,8 @@ def ec2_instance(session):
 
 @ec2_instance.command('list')
 @click.option('--instances', default=None,
-              help='list the selected instances')
+              help='reboot the selected instances '
+                   '(instance-ids separated by commas)')
 @click.option('--project-name', default=None,
               help='print all instances for '
                    'project tag:Project:<name>')
@@ -38,7 +39,8 @@ def list_instances(session, instances, project_name):
 
 @ec2_instance.command('start')
 @click.option('--instances', default=None,
-              help='start the selected instances')
+              help='reboot the selected instances '
+                   '(instance-ids separated by commas)')
 @click.option('--force', is_flag=True,
               help='start all ec2 instances for all projects')
 @click.option('--project-name', default=None,
@@ -66,7 +68,8 @@ def start_instances(session, instances, force, project_name):
 
 @ec2_instance.command('stop')
 @click.option('--instances', default=None,
-              help='stop the selected instances')
+              help='reboot the selected instances '
+                   '(instance-ids separated by commas)')
 @click.option('--force', is_flag=True,
               help='stop all ec2 instances for all projects')
 @click.option('--project-name', default=None,
@@ -94,7 +97,8 @@ def stop_instances(session, instances, force, project_name):
 
 @ec2_instance.command('reboot')
 @click.option('--instances', default=None,
-              help='reboot the selected instances')
+              help='reboot the selected instances '
+                   '(instance-ids separated by commas)')
 @click.option('--force', is_flag=True,
               help='reboot all ec2 instances for all projects')
 @click.option('--project-name', default=None,

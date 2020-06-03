@@ -74,3 +74,7 @@ Commands:
 ##### EC2 Volume
 
     - list  List volumes associated with all instances.
+    - snapshot  - AWS EC2 volume snapshots Automation Commands.
+
+###### EC2 Volume Snapshot
+    - list  List snapshots associated with all volumes.

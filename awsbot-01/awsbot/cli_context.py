@@ -12,7 +12,7 @@ except ImportError:
 
 
 cli_context = click.make_pass_decorator(SessionManager,
-                                         ensure=True)
+                                        ensure=True)
 
 
 if __name__ == '__main__':

@@ -73,4 +73,4 @@ Commands:
 
 ##### EC2 Volume
 
-   - list  List volumes associated with all instances.
+    - list  List volumes associated with all instances.

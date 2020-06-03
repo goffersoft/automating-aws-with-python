@@ -51,6 +51,18 @@ class EC2SessionManager():
                     instances.filter(Filters=filter,
                                      InstanceIds=instance_ids.split(',')))
 
+    def get_volumes(self, instance_ids, project_name):
+        """Iterate over volumes associated with instances."""
+        for inst in self.get_instances(instance_ids, project_name):
+            for volume in inst.volumes.all():
+                yield inst, volume
+
+    def get_volume_snapshots(self, instance_ids, project_name):
+        """Iterate over snapshots associated with instances and volumes."""
+        for inst, volume in self.get_volumes(instance_ids, project_name):
+            for snapshot in volume.snapshots.all():
+                    yield inst, volume, snapshot
+
     @staticmethod
     def get_instance_tags(instance):
         """Get tags associated with ec2 instance."""

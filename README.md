@@ -66,6 +66,6 @@ Commands:
 ##### EC2 Instance 
 
     - list   List EC2 instances.
-    - reboot  Reboot EC2 instances.
+    - reboot Reboot EC2 instances.
     - start  Start EC2 instances.
     - stop   Stop EC2 instances.

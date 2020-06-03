@@ -92,5 +92,33 @@ def stop_instances(session, instances, force, project_name):
         print(err)
 
 
+@ec2_instance.command('reboot')
+@click.option('--instances', default=None,
+              help='reboot the selected instances')
+@click.option('--force', is_flag=True,
+              help='reboot all ec2 instances for all projects')
+@click.option('--project-name', default=None,
+              help='reboot all instances for project tag:Project:<name>')
+@pass_context
+def reboot_instances(session, instances, force, project_name):
+    """Reboot EC2 instances."""
+    if not force and project_name is None:
+        print('Please Specify Project Name associated with Instances')
+        return
+
+    ok, err = EC2InstanceManager(session.get_ec2_session()).\
+        reboot_ec2_instances(instances, project_name)
+
+    print()
+    if ok and not err:
+        print('Successfully rebooted all Instances')
+    elif ok and err:
+        print('Some Instances failed to reboot')
+        print(err)
+    else:
+        print('Instances failed to reboot')
+        print(err)
+
+
 if __name__ == '__main__':
     pass

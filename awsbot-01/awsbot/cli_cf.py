@@ -8,6 +8,7 @@ import click
 try:
     from awsbot.cf_session import CFSessionManager
     from awsbot.cf_distribution import CFDistributionManager
+    from awsbot.s3_session import S3SessionManager
     from awsbot.r53_session import R53SessionManager
     from awsbot.r53_domain import R53DomainManager
     from awsbot.acm_session import ACMSessionManager
@@ -16,6 +17,7 @@ try:
 except ImportError:
     from cf_session import CFSessionManager
     from cf_distribution import CFDistributionManager
+    from s3_session import S3SessionManager
     from r53_session import R53SessionManager
     from r53_domain import R53DomainManager
     from acm_session import ACMSessionManager
@@ -76,6 +78,14 @@ def setup_s3_cdn(session, domain_name, bucket_name, root_object, no_wait):
     if not bucket_name:
         bucket_name = domain_name
 
+    s3_session = session.get_s3_session()
+    if not s3_session:
+        s3_session = S3SessionManager(session)
+
+    if not s3_session.is_valid_s3_bucket(bucket_name):
+        print(f'S3 Bucket : {bucket_name} : Doesnot exist')
+        return
+
     cert = None
     dist_manager = CFDistributionManager(session.get_cf_session())
     dist, err = dist_manager.find_distribution(domain_name)
@@ -104,7 +114,7 @@ def setup_s3_cdn(session, domain_name, bucket_name, root_object, no_wait):
         if not no_wait:
             print('Waiting for distribution to be deployed...')
 
-            ok, err = dist_manager.\
+            _, err = dist_manager.\
                 wait_for_distribution_to_be_deployed(dist['Id'])
 
             if err:

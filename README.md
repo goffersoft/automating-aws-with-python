@@ -61,7 +61,8 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  instance  AWS EC2 instances Automation Commands.
+  instance - AWS EC2 instances Automation Commands.
+  volume   - AWS EC2 instance volumes Automation Commands.
 ```
 ##### EC2 Instance 
 
@@ -69,3 +70,7 @@ Commands:
     - reboot Reboot EC2 instances.
     - start  Start EC2 instances.
     - stop   Stop EC2 instances.
+
+##### EC2 Volume
+
+   - list  List volumes associated with all instances.

@@ -53,7 +53,7 @@ def start_instances(session, instances, force, project_name):
         return
 
     ok, err = EC2InstanceManager(session.get_ec2_session()).\
-        start_ec2_instances(instances, project_name)
+        start_instances(instances, project_name)
 
     print()
     if ok and not err:
@@ -82,7 +82,7 @@ def stop_instances(session, instances, force, project_name):
         return
 
     ok, err = EC2InstanceManager(session.get_ec2_session()).\
-        stop_ec2_instances(instances, project_name)
+        stop_instances(instances, project_name)
 
     print()
     if ok and not err:
@@ -111,7 +111,7 @@ def reboot_instances(session, instances, force, project_name):
         return
 
     ok, err = EC2InstanceManager(session.get_ec2_session()).\
-        reboot_ec2_instances(instances, project_name)
+        reboot_instances(instances, project_name)
 
     print()
     if ok and not err:

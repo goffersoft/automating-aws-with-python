@@ -31,7 +31,7 @@ def ec2_volume(session):
 def list_volumes(session, instances, project_name):
     """List volumes associated with all instances."""
     ok, err = EC2VolumeManager(session.get_ec2_session()).\
-        list_ec2_volumes(instances, project_name)
+        list_volumes(instances, project_name)
 
     if not ok:
         print(err)

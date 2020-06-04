@@ -23,10 +23,11 @@ def ec2_volume(session):
 
 @ec2_volume.command('list')
 @click.option('--instances', default=None,
-              help='reboot the selected instances '
+              help='list volumes for the selected instances '
                    '(instance-ids separated by commas)')
 @click.option('--project-name', default=None,
-              help='reboot all instances for project tag:Project:<name>')
+              help='list volumes for all instances '
+                   'for project tag:Project:<name>')
 @cli_context
 def list_volumes(session, instances, project_name):
     """List volumes associated with all instances."""

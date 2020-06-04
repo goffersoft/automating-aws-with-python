@@ -22,10 +22,10 @@ def ec2_instance(session):
 
 @ec2_instance.command('list')
 @click.option('--instances', default=None,
-              help='reboot the selected instances '
+              help='list the selected instances '
                    '(instance-ids separated by commas)')
 @click.option('--project-name', default=None,
-              help='print all instances for '
+              help='list all instances for '
                    'project tag:Project:<name>')
 @cli_context
 def list_instances(session, instances, project_name):
@@ -39,7 +39,7 @@ def list_instances(session, instances, project_name):
 
 @ec2_instance.command('start')
 @click.option('--instances', default=None,
-              help='reboot the selected instances '
+              help='start the selected instances '
                    '(instance-ids separated by commas)')
 @click.option('--force', is_flag=True,
               help='start all ec2 instances for all projects')
@@ -56,19 +56,12 @@ def start_instances(session, instances, force, project_name):
         start_instances(instances, project_name)
 
     print()
-    if ok and not err:
-        print('Successfully Started All Instances')
-    elif ok and err:
-        print('Some Instances failed to start')
-        print(err)
-    else:
-        print('Instances failed to start')
-        print(err)
+    print(err)
 
 
 @ec2_instance.command('stop')
 @click.option('--instances', default=None,
-              help='reboot the selected instances '
+              help='stop the selected instances '
                    '(instance-ids separated by commas)')
 @click.option('--force', is_flag=True,
               help='stop all ec2 instances for all projects')
@@ -85,14 +78,7 @@ def stop_instances(session, instances, force, project_name):
         stop_instances(instances, project_name)
 
     print()
-    if ok and not err:
-        print('Successfully Stopped All Instances')
-    elif ok and err:
-        print('Some Instances failed to stop')
-        print(err)
-    else:
-        print('Instances failed to stop')
-        print(err)
+    print(err)
 
 
 @ec2_instance.command('reboot')
@@ -114,14 +100,7 @@ def reboot_instances(session, instances, force, project_name):
         reboot_instances(instances, project_name)
 
     print()
-    if ok and not err:
-        print('Successfully rebooted all Instances')
-    elif ok and err:
-        print('Some Instances failed to reboot')
-        print(err)
-    else:
-        print('Instances failed to reboot')
-        print(err)
+    print(err)
 
 
 if __name__ == '__main__':

@@ -13,7 +13,8 @@ class EC2VolumeManager():
         """Initialize EC2 Volume Manager class."""
         self.ec2_session = ec2_session
 
-    def list_volumes(self, project_name, instances, pfunc=None):
+    def list_volumes(self, instance_ids=None,
+                     project_name=None, pfunc=None):
         """List volumes associated with EC2 instances."""
         def default_print(inst, volume):
             tags = self.ec2_session.get_instance_tags(inst)
@@ -30,7 +31,7 @@ class EC2VolumeManager():
 
         try:
             for inst, volume in self.ec2_session.\
-                    get_volumes(instances, project_name):
+                    get_volumes(instance_ids, project_name):
                 pfunc(inst, volume)
 
             return True, None

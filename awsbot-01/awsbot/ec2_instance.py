@@ -13,7 +13,8 @@ class EC2InstanceManager():
         """Initialize EC2 instance Manager Class."""
         self.ec2_session = ec2_session
 
-    def list_instances(self, instance_ids, project_name, pfunc=None):
+    def list_instances(self, instance_ids=None,
+                       project_name=None, pfunc=None):
         """Get instances associated with resource.
 
         Conditionally filter by project name
@@ -40,107 +41,81 @@ class EC2InstanceManager():
         except ClientError as client_err:
             return False, str(client_err)
 
-    @staticmethod
-    def stop_instance(instance, wait, pfunc=None):
-        """Stop ec2 instance."""
-        def default_print(inst):
-            print(f'Stopping {inst.id}...')
-
-        if not pfunc:
-            pfunc = default_print
-
-        try:
-            if pfunc:
-                pfunc(instance)
-
-            instance.stop()
-
-            if wait:
-                instance.wait_until_stopped()
-
-            return True, None
-        except ClientError as client_err:
-            return False, \
-                f'couldnot stop {instance.id} : {str(client_err)}'
-
-    @staticmethod
-    def start_instance(instance, wait, pfunc=None):
-        """Start ec2 instance."""
-        def default_print(inst):
-            print(f'Starting {inst.id}...')
-
-        if not pfunc:
-            pfunc = default_print
-
-        try:
-            if pfunc:
-                pfunc(instance)
-
-            instance.start()
-
-            if wait:
-                instance.wait_until_running()
-
-            return True, None
-        except ClientError as client_err:
-            return False, \
-                f'couldnot start {instance.id} : {str(client_err)}'
-
-    def start_instances(self, instance_ids, project_name, pfunc=None):
+    def start_instances(self, instance_ids=None,
+                        project_name=None, sfunc=None):
         """Start EC2 instances."""
-        err_list = []
-        ret_val = False
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        success_count = 0
+        failure_count = 0
         for inst in self.ec2_session.\
                 get_instances(instance_ids, project_name):
-            ok, err = self.start_instance(inst, False, pfunc)
-
+            ok, err = self.ec2_session.start_instance(inst, False, sfunc)
             if not ok:
-                err_list.append(err)
+                sfunc(err)
+                failure_count += 1
             else:
-                ret_val = True
+                success_count += 1
 
-        if not ret_val and not err_list:
-            return False, 'No Instances Selected'
+        return self.ec2_session.get_status(success_count, failure_count)
 
-        return ret_val, err_list
-
-    def stop_instances(self, instance_ids, project_name, pfunc=None):
+    def stop_instances(self, instance_ids=None,
+                       project_name=None, sfunc=None):
         """Stop EC2 instances."""
-        err_list = []
-        ret_val = False
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        success_count = 0
+        failure_count = 0
         for inst in self.ec2_session.\
                 get_instances(instance_ids, project_name):
-            ok, err = self.stop_instance(inst, False, pfunc)
+            ok, err = self.ec2_session.stop_instance(inst, False, sfunc)
             if not ok:
-                err_list.append(err)
+                sfunc(err)
+                failure_count += 1
             else:
-                ret_val = True
+                success_count += 1
 
-        if not ret_val and not err_list:
-            return False, 'No Instances Selected'
+        return self.ec2_session.get_status(success_count, failure_count)
 
-        return ret_val, err_list
-
-    def reboot_instances(self, instance_ids, project_name, pfunc=None):
+    def reboot_instances(self, instance_ids=None,
+                         project_name=None, sfunc=None):
         """Reboot EC2 Instances."""
-        err_list = []
-        ret_val = False
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        success_count = 0
+        failure_count = 0
         for inst in self.ec2_session.\
                 get_instances(instance_ids, project_name):
-            ok, err = self.stop_instance(inst, True, pfunc)
+            ok, err = self.ec2_session.stop_instance(inst, True, sfunc)
             if not ok:
-                err_list.append(err)
-                continue
-
-            ret_val = True
-
-            ok, err = self.start_instance(inst, False, pfunc)
-            if not ok:
-                err_list.append(err)
+                sfunc(err)
+                failure_count += 1
             else:
-                ret_val = True
+                success_count += 1
 
-        return ret_val, err_list
+            ok, err = self.ec2_session.start_instance(inst, False, sfunc)
+            if not ok:
+                sfunc(err)
+                failure_count += 1
+            else:
+                success_count += 1
+
+        return self.ec2_session.get_status(success_count, failure_count)
 
 
 if __name__ == '__main__':

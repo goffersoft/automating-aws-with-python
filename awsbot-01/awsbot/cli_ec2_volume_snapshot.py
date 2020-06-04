@@ -27,7 +27,7 @@ def ec2_volume_snapshot(session):
 @click.option('--project-name', default=None,
               help='list volume snapshots for all instances '
                    'for project tag:Project:<name>')
-@click.option('--all', default=False, is_flag=True,
+@click.option('--all', 'list_all', default=False, is_flag=True,
               help='list all volume snapshots (not just the latest ones')
 @cli_context
 def list_volume_snapshots(session, instances, project_name, list_all):

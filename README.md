@@ -77,4 +77,5 @@ Commands:
     - snapshot  - AWS EC2 volume snapshots Automation Commands.
 
 ###### EC2 Volume Snapshot
-    - list  List snapshots associated with all volumes.
+    - create  Create volume snapshots associated with selected instances.  
+    - list    List snapshots associated with all volumes.

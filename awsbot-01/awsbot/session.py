@@ -49,17 +49,19 @@ class SessionManager():
         """Get session."""
         return self.session
 
-    def get_resource(self, resource_name):
+    def get_resource(self, resource_name, region_name=None):
         """Get resource by input resource name."""
-        return self.session.resource(resource_name)
+        if not region_name:
+            return self.session.resource(resource_name)
+
+        return self.session.resource(resource_name, region_name=region_name)
 
     def get_client(self, client_name, region_name=None):
         """Get client by input client name."""
         if not region_name:
             return self.session.client(client_name)
 
-        return self.session.client(client_name,
-                                   region_name=region_name)
+        return self.session.client(client_name, region_name=region_name)
 
     def get_region_name(self):
         """Get region name associated with this session."""

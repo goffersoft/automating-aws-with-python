@@ -182,6 +182,11 @@ class EC2SessionManager():
 
         return False, 'Failure'
 
+    def get_keypairs(self):
+        """Iterate over ec2 keypairs."""
+        for keypair in self.get_ec2_resource().key_pairs.all():
+            yield keypair
+
 
 if __name__ == '__main__':
     pass

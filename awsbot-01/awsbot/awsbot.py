@@ -13,6 +13,7 @@ try:
     from awsbot.cli_ec2_instance import ec2_instance
     from awsbot.cli_ec2_volume import ec2_volume
     from awsbot.cli_ec2_volume_snapshot import ec2_volume_snapshot
+    from awsbot.cli_ec2_keypair import ec2_keypair
 except ImportError:
     from cli_main import cli
     from cli_s3 import s3
@@ -23,6 +24,7 @@ except ImportError:
     from cli_ec2_instance import ec2_instance
     from cli_ec2_volume import ec2_volume
     from cli_ec2_volume_snapshot import ec2_volume_snapshot
+    from cli_ec2_keypair import ec2_keypair
 
 
 def cli_init_s3():
@@ -48,6 +50,7 @@ def cli_init_cf():
 def cli_init_ec2():
     """Initialize awsbot cli for ec2."""
     ec2_volume.add_command(ec2_volume_snapshot)
+    ec2.add_command(ec2_keypair)
     ec2.add_command(ec2_volume)
     ec2.add_command(ec2_instance)
     cli.add_command(ec2)

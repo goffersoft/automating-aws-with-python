@@ -62,14 +62,23 @@ Options:
 
 Commands:
   instance - AWS EC2 instances Automation Commands.
+  keypair  - AWS EC2 Key Pair Automation Commands.
   volume   - AWS EC2 instance volumes Automation Commands.
 ```
+
 ##### EC2 Instance 
 
     - list   List EC2 instances.
     - reboot Reboot EC2 instances.
     - start  Start EC2 instances.
     - stop   Stop EC2 instances.
+
+##### EC2 KeyPair
+
+    - create  Create KeyPair. - TO DO
+    - delete  Delete KeyPair. - TO DO
+    - import  Import KeyPair. - TO DO
+    - list    List All KeyPairs.
 
 ##### EC2 Volume
 

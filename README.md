@@ -77,7 +77,7 @@ Commands:
 
     - create  Create KeyPair.
     - delete  Delete KeyPair.
-    - import  Import KeyPair. - TO DO
+    - import  Import KeyPair.
     - list    List All KeyPairs.
 
 ##### EC2 Volume

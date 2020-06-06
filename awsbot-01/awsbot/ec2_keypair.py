@@ -97,6 +97,32 @@ class EC2KeyPairManager():
         except ClientError as client_err:
             return False, str(client_err)
 
+    def import_keypair(self, keypair_name, public_key_file):
+        """Import a KeyPair."""
+        ok, path = util.does_file_exist(public_key_file)
+
+        if not ok:
+            return False, f'Invalid public key file: {public_key_file}'
+
+        ok, _, err = self.is_already_created(keypair_name)
+        if err:
+            return False, err
+
+        if ok:
+            return False, f'keypair : {keypair_name} : already exists'
+
+        public_key_bytes = None
+        with path.open('rb') as key_file:
+            public_key_bytes = key_file.read()
+
+        try:
+            self.ec2_session.get_ec2_resource().\
+                      import_key_pair(KeyName=keypair_name,
+                                      PublicKeyMaterial=public_key_bytes)
+            return True, None
+        except ClientError as client_err:
+            return False, str(client_err)
+
 
 if __name__ == '__main__':
     pass

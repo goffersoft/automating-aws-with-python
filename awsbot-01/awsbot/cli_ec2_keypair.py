@@ -32,38 +32,45 @@ def list_keypair(session):
 
 
 @ec2_keypair.command('create')
-@click.argument('name')
-@click.argument('filename')
+@click.argument('keypair-name')
+@click.argument('pem-filename')
 @cli_context
-def create_keypair(session, name, filename):
+def create_keypair(session, keypair_name, pem_filename):
     """Create KeyPair."""
     ok, err = EC2KeyPairManager(session.get_ec2_session()).\
-        create_keypair(name, filename)
+        create_keypair(keypair_name, pem_filename)
 
     if not ok:
         print(err)
         return
 
     print('KeyPair Successfully Created...')
-    print(f'KeyPair Private Key (PEM Format) is in : {filename}')
+    print(f'KeyPair Private Key (PEM Format) is in : {pem_filename}')
 
 
 @ec2_keypair.command('import')
-@click.argument('name')
-@click.argument('public-key')
+@click.argument('keypair-name')
+@click.argument('public-key-file')
 @cli_context
-def import_keypair(session, name, public_key):
+def import_keypair(session, keypair_name, public_key_file):
     """Import KeyPair."""
-    pass
+    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+        import_keypair(keypair_name, public_key_file)
+
+    if not ok:
+        print(err)
+        return
+
+    print(f'KeyPair Successfully Imported From : {public_key_file}')
 
 
 @ec2_keypair.command('delete')
-@click.argument('name')
+@click.argument('keypair-name')
 @cli_context
-def delete_keypair(session, name):
+def delete_keypair(session, keypair_name):
     """Delete KeyPair."""
     ok, err = EC2KeyPairManager(session.get_ec2_session()).\
-        delete_keypair(name)
+        delete_keypair(keypair_name)
 
     if not ok:
         print(err)

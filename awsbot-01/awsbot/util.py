@@ -236,6 +236,19 @@ def get_file_path(path):
     return None, f'Invalid path name : {path}'
 
 
+def does_file_exist(input_filename):
+    """Determine if the file exists."""
+    path = Path(input_filename).expanduser().resolve()
+
+    if not path.exists():
+        return False, None
+
+    if not path.is_file():
+        return False, None
+
+    return True, path
+
+
 def getuuid():
     """Return a randomly generated UUID4 object."""
     return uuid4()

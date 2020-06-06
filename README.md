@@ -75,8 +75,8 @@ Commands:
 
 ##### EC2 KeyPair
 
-    - create  Create KeyPair. - TO DO
-    - delete  Delete KeyPair. - TO DO
+    - create  Create KeyPair.
+    - delete  Delete KeyPair.
     - import  Import KeyPair. - TO DO
     - list    List All KeyPairs.
 

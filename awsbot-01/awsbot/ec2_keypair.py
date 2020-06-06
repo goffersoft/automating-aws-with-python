@@ -3,7 +3,13 @@
 
 """EC2 KeyPair Manager Class."""
 
+import stat
 from botocore.exceptions import ClientError
+
+try:
+    from awsbot import util
+except ImportError:
+    import util
 
 
 class EC2KeyPairManager():
@@ -37,6 +43,59 @@ class EC2KeyPairManager():
             return True, None
         except ClientError as client_err:
             return False, client_err
+
+    def is_already_created(self, keypair_name):
+        """Determine if the KeyPair has already been created."""
+        try:
+            for keypair in self.ec2_session.get_keypairs():
+                if keypair_name == keypair.name:
+                    return True, keypair, None
+            return False, None, None
+        except ClientError as client_err:
+            return False, None, str(client_err)
+
+    def create_keypair(self, keypair_name, output_filepath):
+        """Create a KeyPair."""
+        ok, path = util.is_valid_file_path(output_filepath)
+
+        if not ok:
+            return False, f'Invalid file path : {output_filepath}'
+
+        ok, _, err = self.is_already_created(keypair_name)
+        if err:
+            return False, err
+
+        if ok:
+            return False, f'keypair : {keypair_name} : already exists'
+
+        keypair = None
+        try:
+            keypair = self.ec2_session.get_ec2_resource().\
+                          create_key_pair(KeyName=keypair_name)
+        except ClientError as client_err:
+            return False, str(client_err)
+
+        with path.open('w') as pem_file:
+            pem_file.write(keypair.key_material)
+
+        path.chmod(stat.S_IRUSR | stat.S_IWUSR)
+
+        return True, None
+
+    def delete_keypair(self, keypair_name):
+        """Delete a KeyPair."""
+        ok, keypair, err = self.is_already_created(keypair_name)
+        if err:
+            return False, err
+
+        if not ok:
+            return False, f'keypair : {keypair_name} : doesnot exist'
+
+        try:
+            keypair.delete()
+            return True, None
+        except ClientError as client_err:
+            return False, str(client_err)
 
 
 if __name__ == '__main__':

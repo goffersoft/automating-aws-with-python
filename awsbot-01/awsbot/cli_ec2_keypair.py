@@ -37,7 +37,15 @@ def list_keypair(session):
 @cli_context
 def create_keypair(session, name, filename):
     """Create KeyPair."""
-    pass
+    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+        create_keypair(name, filename)
+
+    if not ok:
+        print(err)
+        return
+
+    print('KeyPair Successfully Created...')
+    print(f'KeyPair Private Key (PEM Format) is in : {filename}')
 
 
 @ec2_keypair.command('import')
@@ -54,7 +62,14 @@ def import_keypair(session, name, public_key):
 @cli_context
 def delete_keypair(session, name):
     """Delete KeyPair."""
-    pass
+    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+        delete_keypair(name)
+
+    if not ok:
+        print(err)
+        return
+
+    print('KeyPair Successfully Deleted')
 
 
 if __name__ == '__main__':

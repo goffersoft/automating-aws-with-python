@@ -251,5 +251,37 @@ def str_to_list(input_str, valid_values, delimiter=','):
     return input_list, None
 
 
+def is_valid_dir_path(path_to_dir):
+    """Determine if the input dir path is valid.
+
+    if its valid, return a path object
+    """
+    path = Path(path_to_dir).expanduser().resolve()
+
+    if path.is_dir():
+        return True, path
+
+    return False, None
+
+
+def is_valid_file_path(path_to_file):
+    """Determine if the input file path is valid.
+
+    if its valid, return a path object
+    """
+    path = Path(path_to_file).expanduser().resolve()
+
+    if path.is_dir():
+        return False, None
+
+    if path.is_file():
+        return True, path
+
+    if path.parent.is_dir():
+        return True, path
+
+    return False, None
+
+
 if __name__ == '__main__':
     pass

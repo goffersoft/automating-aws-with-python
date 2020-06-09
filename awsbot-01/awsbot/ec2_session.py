@@ -7,6 +7,11 @@ import datetime
 
 from botocore.exceptions import ClientError
 
+try:
+    from awsbot import util
+except ImportError:
+    import util
+
 
 class EC2SessionManager():
     """EC2 Session Manager Class."""
@@ -198,14 +203,57 @@ class EC2SessionManager():
         for keypair in self.get_ec2_resource().key_pairs.all():
             yield keypair
 
-    def get_security_groups(self):
+    def get_security_groups(self, group_id_list=None, group_name_list=None):
         """Iterate over security groups."""
         paginator = \
             self.get_describe_security_groups_paginator()
 
         for page in paginator.paginate():
             for security_group in page['SecurityGroups']:
-                yield security_group
+                match = False
+                if group_id_list and security_group['GroupId'] \
+                        in group_id_list:
+                    match = True
+
+                if not match and group_name_list and \
+                        security_group['GroupName'] in group_name_list:
+                    match = True
+
+                if match:
+                    yield security_group
+
+    @staticmethod
+    def get_default_security_group_description(group_name):
+        """Get Default Security Group Description."""
+        return f'{group_name} created by awsbot on ' + \
+               f'{util.get_utcnow_with_tzinfo()}'
+
+    def delete_security_group(self, group_id, group_name, sfunc=None):
+        """Delete a Security Group."""
+        if not group_id and not group_name:
+            return False, "Require group_id or group_name"
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
+            if sfunc:
+                group = group_id if group_id else group_name
+                sfunc(f'Deleting Security Group : {group}')
+
+            if group_id:
+                self.get_ec2_client().\
+                    delete_security_group(GroupId=group_id)
+            else:
+                self.get_ec2_client().\
+                    delete_security_group(GroupName=group_name)
+
+            return True, None
+        except ClientError as client_err:
+            return False, client_err
 
 
 if __name__ == '__main__':

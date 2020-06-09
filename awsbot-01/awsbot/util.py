@@ -3,6 +3,7 @@
 
 """Utility functions."""
 
+import datetime
 from uuid import uuid4
 import csv
 import mimetypes
@@ -254,9 +255,13 @@ def getuuid():
     return uuid4()
 
 
-def str_to_list(input_str, valid_values, delimiter=','):
+def str_to_list(input_str, valid_values=None, delimiter=','):
     """Convert a string to a list."""
     input_list = input_str.split(delimiter)
+
+    if not valid_values:
+        return input_list
+
     for item in input_list:
         if item not in valid_values:
             return None, f'{item} not in list of ' + \
@@ -294,6 +299,11 @@ def is_valid_file_path(path_to_file):
         return True, path
 
     return False, None
+
+
+def get_utcnow_with_tzinfo():
+    """Get utc datetime string with tzinfo."""
+    return datetime.datetime.utcnow().astimezone().isoformat()
 
 
 if __name__ == '__main__':

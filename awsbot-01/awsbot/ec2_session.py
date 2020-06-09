@@ -31,6 +31,17 @@ class EC2SessionManager():
         """Set session."""
         self.session = session
 
+    def get_ec2_paginator(self, name):
+        """Get ec2 paginator."""
+        try:
+            return self.get_ec2_client().get_paginator(name), None
+        except KeyError as key_error:
+            return None, str(key_error)
+
+    def get_describe_security_groups_paginator(self):
+        """Get ec2 'DescribeSecurityGroups' paginator."""
+        return self.get_ec2_paginator('describe_security_groups')[0]
+
     def get_instances(self, instance_ids=None, project_name=None):
         """Get instances associated with resource.
 
@@ -186,6 +197,15 @@ class EC2SessionManager():
         """Iterate over ec2 keypairs."""
         for keypair in self.get_ec2_resource().key_pairs.all():
             yield keypair
+
+    def get_security_groups(self):
+        """Iterate over security groups."""
+        paginator = \
+            self.get_describe_security_groups_paginator()
+
+        for page in paginator.paginate():
+            for security_group in page['SecurityGroups']:
+                yield security_group
 
 
 if __name__ == '__main__':

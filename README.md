@@ -61,9 +61,10 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  instance - AWS EC2 instances Automation Commands.
-  keypair  - AWS EC2 Key Pair Automation Commands.
-  volume   - AWS EC2 instance volumes Automation Commands.
+  instance        - AWS EC2 instances Automation Commands.
+  keypair         - AWS EC2 Key Pair Automation Commands.
+  security-group  - AWS EC2 Security Group Automation Commands.
+  volume          - AWS EC2 instance volumes Automation Commands.
 ```
 
 ##### EC2 Instance 
@@ -79,6 +80,10 @@ Commands:
     - delete  Delete KeyPair.
     - import  Import KeyPair.
     - list    List All KeyPairs.
+
+##### EC2 Security Group
+
+    - list  List All Security groups.
 
 ##### EC2 Volume
 

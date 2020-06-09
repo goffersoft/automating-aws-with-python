@@ -83,6 +83,8 @@ Commands:
 
 ##### EC2 Security Group
 
+    - create  Create Security group.
+    - delete  Delete Security group. 
     - list  List All Security groups.
 
 ##### EC2 Volume

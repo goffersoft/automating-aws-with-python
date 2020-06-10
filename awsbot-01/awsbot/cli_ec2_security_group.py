@@ -21,17 +21,16 @@ def ec2_security_group(session):
 
 
 @ec2_security_group.command('list')
-@click.option('--group-ids', default=None,
-              help='filter by (comma separated) group-ids')
-@click.option('--group-names', default=None,
-              help='filter by (comma separated) group-names')
+@click.option('--groups', default=None,
+              help='filter by (comma separated) groups. ' +
+              'can be group ids or group names of a mix of both')
 @click.option('--long', is_flag=True,
               help='print out rule info as well')
 @cli_context
-def list_security_groups(session, long, group_ids, group_names):
+def list_security_groups(session, groups, long):
     """List All Security groups."""
     ok, err = EC2SecurityGroupManager(session.get_ec2_session()).\
-        list_security_groups(group_ids, group_names, long)
+        list_security_groups(groups, groups, long)
 
     if not ok:
         print(err)
@@ -53,18 +52,16 @@ def create_security_groups(session, group_name, vpc_id, description):
 
 
 @ec2_security_group.command('delete')
-@click.argument('group-id-or-name')
-@click.option('--group-name-type', is_flag=True,
-              help='indicates that (comma separated) arguments ' +
-              'passed in are group names')
+@click.argument('groups')
 @cli_context
-def delete_security_groups(session, group_id_or_name, group_name_type):
-    """Delete Security group."""
-    group_names = group_id_or_name if group_name_type else None
-    group_ids = group_id_or_name if not group_name_type else None
+def delete_security_groups(session, groups):
+    """Delete Security group.
 
+    Filter by (comma separated) groups. Can be
+    group ids or group names of a mix of both'
+    """
     ok, status = EC2SecurityGroupManager(session.get_ec2_session()).\
-        delete_security_groups(group_ids, group_names)
+        delete_security_groups(groups, groups)
 
     print(status)
 

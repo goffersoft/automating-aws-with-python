@@ -29,6 +29,7 @@ class EC2SecurityGroupManager():
             if from_port != -1:
                 to_port = rule.get('ToPort', -1)
                 port = f'{from_port}' if to_port == -1 \
+                    or from_port == to_port \
                     else f'{from_port}-{to_port}'
             prot = rule.get('IpProtocol', -1)
             prot = 'Any-Protocol' if prot == '-1' else prot
@@ -69,7 +70,7 @@ class EC2SecurityGroupManager():
                 rule_index = 1
                 print()
                 print('    Egress-Rules')
-                for rule in security_group['IpPermissions']:
+                for rule in security_group['IpPermissionsEgress']:
                     print_rule(rule_index, rule)
                     rule_index = rule_index + 1
 

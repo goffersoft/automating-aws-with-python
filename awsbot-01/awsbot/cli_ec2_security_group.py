@@ -57,8 +57,8 @@ def create_security_groups(session, group_name, vpc_id, description):
 def delete_security_groups(session, groups):
     """Delete Security group.
 
-    Filter by (comma separated) groups. Can be
-    group ids or group names of a mix of both'
+    Delete security groups associated with (comma separated) groups.
+    Can be group ids or group names of a mix of both'.
     """
     ok, status = EC2SecurityGroupManager(session.get_ec2_session()).\
         delete_security_groups(groups, groups)

@@ -211,8 +211,12 @@ class EC2SessionManager():
         for page in paginator.paginate():
             for security_group in page['SecurityGroups']:
                 match = False
-                if group_id_list and security_group['GroupId'] \
-                        in group_id_list:
+
+                if not group_id_list and not group_name_list:
+                    match = True
+
+                if not match and group_id_list \
+                        and security_group['GroupId'] in group_id_list:
                     match = True
 
                 if not match and group_name_list and \

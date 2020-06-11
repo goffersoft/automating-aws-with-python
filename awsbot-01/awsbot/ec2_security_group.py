@@ -23,19 +23,39 @@ class EC2SecurityGroupManager():
         """List All Security Groups In This region."""
         index = 1
 
+        def get_port_label(port, from_port, to_port):
+            if from_port not in (-1, 0, 65535):
+                port = f'{from_port}' if to_port in (-1, from_port) \
+                    else f'{from_port}-{to_port}'
+            return port
+
+        def get_icmp_prot_label(prot, from_port, to_port):
+            if from_port == -1:
+                prot = prot + '-anycode'
+            else:
+                prot = prot + '-' + str(from_port)
+
+            if to_port == -1:
+                prot = prot + '-anytype'
+            else:
+                prot = prot + '-' + str(to_port)
+            return prot
+
         def print_rule(rule_index, rule, spaces=4):
             port = 'Any-Port'
-            from_port = rule.get('FromPort', -1)
-            if from_port != -1:
-                to_port = rule.get('ToPort', -1)
-                port = f'{from_port}' if to_port == -1 \
-                    or from_port == to_port \
-                    else f'{from_port}-{to_port}'
             prot = rule.get('IpProtocol', -1)
+            if prot != -1:
+                from_port = rule.get('FromPort', -1)
+                to_port = rule.get('ToPort', -1)
+                port = get_port_label(port, from_port, to_port)
+
             prot = 'Any-Protocol' if prot == '-1' else prot
+            if 'icmp' in prot:
+                port = 'N/A'
+                prot = get_icmp_prot_label(prot, from_port, to_port)
 
             print(f'{" " * spaces}[{rule_index}] ' +
-                  f': {port} : {prot} : ', end='')
+                  f': {prot} : {port} : ', end='')
             if not rule['UserIdGroupPairs']:
                 print(f'{rule["IpRanges"]} : {rule["Ipv6Ranges"]}')
             else:

@@ -30,10 +30,10 @@ def ec2_instance(session):
 @cli_context
 def list_instances(session, instances, project_name):
     """List EC2 instances."""
-    ok, err = EC2InstanceManager(session.get_ec2_session()).\
+    aok, err = EC2InstanceManager(session.get_ec2_session()).\
         list_instances(instances, project_name)
 
-    if not ok:
+    if not aok:
         print(err)
 
 
@@ -52,7 +52,7 @@ def start_instances(session, instances, force, project_name):
         print('Please Specify Project Name associated with Instances')
         return
 
-    ok, err = EC2InstanceManager(session.get_ec2_session()).\
+    _, err = EC2InstanceManager(session.get_ec2_session()).\
         start_instances(instances, project_name)
 
     print()
@@ -74,7 +74,7 @@ def stop_instances(session, instances, force, project_name):
         print('Please Specify Project Name associated with Instances')
         return
 
-    ok, err = EC2InstanceManager(session.get_ec2_session()).\
+    _, err = EC2InstanceManager(session.get_ec2_session()).\
         stop_instances(instances, project_name)
 
     print()
@@ -96,7 +96,7 @@ def reboot_instances(session, instances, force, project_name):
         print('Please Specify Project Name associated with Instances')
         return
 
-    ok, err = EC2InstanceManager(session.get_ec2_session()).\
+    _, err = EC2InstanceManager(session.get_ec2_session()).\
         reboot_instances(instances, project_name)
 
     print()

@@ -55,8 +55,8 @@ class EC2InstanceManager():
         failure_count = 0
         for inst in self.ec2_session.\
                 get_instances(instance_ids, project_name):
-            ok, err = self.ec2_session.start_instance(inst, False, sfunc)
-            if not ok:
+            aok, err = self.ec2_session.start_instance(inst, False, sfunc)
+            if not aok:
                 sfunc(err)
                 failure_count += 1
             else:
@@ -78,8 +78,8 @@ class EC2InstanceManager():
         failure_count = 0
         for inst in self.ec2_session.\
                 get_instances(instance_ids, project_name):
-            ok, err = self.ec2_session.stop_instance(inst, False, sfunc)
-            if not ok:
+            aok, err = self.ec2_session.stop_instance(inst, False, sfunc)
+            if not aok:
                 sfunc(err)
                 failure_count += 1
             else:
@@ -101,15 +101,15 @@ class EC2InstanceManager():
         failure_count = 0
         for inst in self.ec2_session.\
                 get_instances(instance_ids, project_name):
-            ok, err = self.ec2_session.stop_instance(inst, True, sfunc)
-            if not ok:
+            aok, err = self.ec2_session.stop_instance(inst, True, sfunc)
+            if not aok:
                 sfunc(err)
                 failure_count += 1
             else:
                 success_count += 1
 
-            ok, err = self.ec2_session.start_instance(inst, False, sfunc)
-            if not ok:
+            aok, err = self.ec2_session.start_instance(inst, False, sfunc)
+            if not aok:
                 sfunc(err)
                 failure_count += 1
             else:

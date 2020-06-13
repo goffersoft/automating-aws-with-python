@@ -54,10 +54,10 @@ def list_certs(session, status_filter):
     VALIDATION_TIMED_OUT, PENDING_VALIDATION, EXPIRED,
     INACTIVE, ISSUED, FAILED, REVOKED
     """
-    ok, err = ACMCertificateManager(session.get_acm_session()).\
+    aok, err = ACMCertificateManager(session.get_acm_session()).\
         list_certs(status_filter)
 
-    if not ok:
+    if not aok:
         print(err)
 
 

@@ -32,10 +32,10 @@ def ec2_volume_snapshot(session):
 @cli_context
 def list_volume_snapshots(session, instances, project_name, list_all):
     """List snapshots associated with all volumes."""
-    ok, err = EC2SnapshotManager(session.get_ec2_session()).\
+    aok, err = EC2SnapshotManager(session.get_ec2_session()).\
         list_volume_snapshots(instances, project_name, list_all)
 
-    if not ok:
+    if not aok:
         print(err)
 
 
@@ -52,10 +52,10 @@ def list_volume_snapshots(session, instances, project_name, list_all):
 @cli_context
 def create_volume_snapshots(session, instances, project_name, age):
     """Create volume snapshots associated with selected instances."""
-    ok, err = EC2SnapshotManager(session.get_ec2_session()).\
+    aok, err = EC2SnapshotManager(session.get_ec2_session()).\
         create_volume_snapshots(instances, project_name, age)
 
-    if not ok:
+    if not aok:
         print(err)
 
 

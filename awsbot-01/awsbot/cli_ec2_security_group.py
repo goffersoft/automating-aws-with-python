@@ -47,6 +47,7 @@ def create_security_groups(session, group_name, vpc_id, description):
     _, status = EC2SecurityGroupManager(session.get_ec2_session()).\
         create_security_group(group_name, vpc_id, description)
 
+    print()
     print(status)
 
 
@@ -62,6 +63,7 @@ def delete_security_groups(session, groups):
     _, status = EC2SecurityGroupManager(session.get_ec2_session()).\
         delete_security_groups(groups)
 
+    print()
     print(status)
 
 

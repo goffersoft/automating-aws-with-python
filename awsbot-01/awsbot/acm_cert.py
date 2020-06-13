@@ -65,11 +65,11 @@ class ACMCertificateManager():
         """Get cert that matches domain name."""
         try:
             for cert in self.acm_session.get_certs(['ISSUED']):
-                ok, err = self.\
+                aok, err = self.\
                     cert_matches(cert['CertificateArn'], domain_name)
                 if err:
                     return None, err
-                if ok:
+                if aok:
                     return cert, None
             return None, \
                 f'Cannot find cert matching : {domain_name}'

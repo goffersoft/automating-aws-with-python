@@ -99,9 +99,9 @@ class S3SessionManager():
         validates the s3 bucket policy (file or a string)
         and return the s3 bucket policy as string
         """
-        ok, file_type, err = self.is_valid_s3_bucket_policy(bucket_policy)
+        aok, file_type, err = self.is_valid_s3_bucket_policy(bucket_policy)
 
-        if not ok:
+        if not aok:
             return None, err
 
         if file_type == 'file':
@@ -140,9 +140,9 @@ class S3SessionManager():
     def create_s3_bucket_object_html(self, bucket_res,
                                      html_content, keyname):
         """Create a s3 bucket (html) object."""
-        ok, file_type, err = util.is_valid_html(html_content)
+        aok, file_type, err = util.is_valid_html(html_content)
 
-        if not ok:
+        if not aok:
             return False, err
 
         try:
@@ -226,9 +226,9 @@ class S3SessionManager():
                                        'LocationConstraint':
                                        bucket_region})
 
-            ok, err = self.create_s3_bucket_policy(bucket, policy, False)
+            aok, err = self.create_s3_bucket_policy(bucket, policy, False)
 
-            if not ok:
+            if not aok:
                 return None, f'Fatal : Cannot Create Bucket Policy : {err}'
 
         except ClientError as client_error:

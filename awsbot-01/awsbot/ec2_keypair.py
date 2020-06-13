@@ -56,16 +56,16 @@ class EC2KeyPairManager():
 
     def create_keypair(self, keypair_name, output_filepath):
         """Create a KeyPair."""
-        ok, path = util.is_valid_file_path(output_filepath)
+        aok, path = util.is_valid_file_path(output_filepath)
 
-        if not ok:
+        if not aok:
             return False, f'Invalid file path : {output_filepath}'
 
-        ok, _, err = self.is_already_created(keypair_name)
+        aok, _, err = self.is_already_created(keypair_name)
         if err:
             return False, err
 
-        if ok:
+        if aok:
             return False, f'keypair : {keypair_name} : already exists'
 
         keypair = None
@@ -84,11 +84,11 @@ class EC2KeyPairManager():
 
     def delete_keypair(self, keypair_name):
         """Delete a KeyPair."""
-        ok, keypair, err = self.is_already_created(keypair_name)
+        aok, keypair, err = self.is_already_created(keypair_name)
         if err:
             return False, err
 
-        if not ok:
+        if not aok:
             return False, f'keypair : {keypair_name} : doesnot exist'
 
         try:
@@ -99,16 +99,16 @@ class EC2KeyPairManager():
 
     def import_keypair(self, keypair_name, public_key_file):
         """Import a KeyPair."""
-        ok, path = util.does_file_exist(public_key_file)
+        aok, path = util.does_file_exist(public_key_file)
 
-        if not ok:
+        if not aok:
             return False, f'Invalid public key file: {public_key_file}'
 
-        ok, _, err = self.is_already_created(keypair_name)
+        aok, _, err = self.is_already_created(keypair_name)
         if err:
             return False, err
 
-        if ok:
+        if aok:
             return False, f'keypair : {keypair_name} : already exists'
 
         public_key_bytes = None

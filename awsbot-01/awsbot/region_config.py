@@ -28,9 +28,9 @@ class RegionConfig():
             """Initialize the region_endpoints dictionary."""
             save = self.region_endpoints
             self.region_endpoints = {}
-            ok, err = util.csv_to_dict(csvfile,
-                                       self.region_endpoints, Endpoint)
-            if not ok:
+            aok, err = util.csv_to_dict(csvfile,
+                                        self.region_endpoints, Endpoint)
+            if not aok:
                 self.region_endpoints = save
                 raise FileNotFoundError(err)
 

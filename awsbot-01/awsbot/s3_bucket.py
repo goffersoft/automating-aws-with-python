@@ -49,27 +49,27 @@ class S3BucketManager():
             self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot create bucket {name}: {err}'
 
-        ok, err = self.s3_session.\
+        aok, err = self.s3_session.\
             create_s3_bucket_object_html(bucket_res,
                                          index_file,
                                          index_name)
-        if not ok:
+        if not aok:
             self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot create bucket object {index_file} : {err}'
 
-        ok, err = self.s3_session.\
+        aok, err = self.s3_session.\
             create_s3_bucket_object_html(bucket_res,
                                          error_file,
                                          error_name)
-        if not ok:
+        if not aok:
             self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot create bucket {error_file} : {err}'
 
-        ok, err = self.s3_session.\
+        aok, err = self.s3_session.\
             s3_bucket_enable_webhosting(bucket_res,
                                         index_name,
                                         error_name)
-        if not ok:
+        if not aok:
             self.s3_session.s3_bucket_cleanup(name, bucket_res)
             return None, f'Cannot enable web hosting{""}' +\
                          f' on bucket : {name} : {err}'
@@ -98,8 +98,8 @@ class S3BucketManager():
             content_type = util.get_content_type_from_filename(filename)
 
             if validate and content_type.find('html') != -1:
-                ok, err = util.is_valid_html_file(pathname)
-                if not ok:
+                aok, err = util.is_valid_html_file(pathname)
+                if not aok:
                     err_map[pathname] = err
                     return
 
@@ -116,11 +116,11 @@ class S3BucketManager():
 
         if len(err_map) == 0:
             for key, value in path_map.items():
-                ok, err = \
+                aok, err = \
                     self.s3_session.create_s3_bucket_object(
                         self.s3_session.get_s3_bucket_resource(bucket_name),
                         key, value)
-                if not ok:
+                if not aok:
                     return None, err
             return self.s3_session.get_s3_bucket_url(bucket_name)
 

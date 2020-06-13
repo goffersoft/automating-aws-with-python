@@ -83,6 +83,7 @@ def create_rule(session, groups, egress_rule,
                     security_groups, security_group_descriptions,
                     icmp_type, icmp_code)
 
+    print()
     print(status)
 
 
@@ -142,6 +143,7 @@ def delete_rule(session, groups, egress_rule,
                     ipv6_cidr, security_groups,
                     icmp_type, icmp_code)
 
+    print()
     print(status)
 
 

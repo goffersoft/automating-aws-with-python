@@ -76,9 +76,9 @@ class EC2SnapshotManager():
                     continue
 
                 if self.ec2_session.is_instance_running(instance):
-                    ok, err = self.ec2_session.\
+                    aok, err = self.ec2_session.\
                         stop_instance(instance, True)
-                    if ok:
+                    if aok:
                         stopped = True
                     else:
                         sfunc(err)
@@ -87,7 +87,7 @@ class EC2SnapshotManager():
                 sfunc(f'creating snapshot...({instance.id}, {volume.id})')
                 volume.create_snapshot(Description=comment)
                 if stopped:
-                    ok, err = self.ec2_session.start_instance(instance, True)
+                    aok, err = self.ec2_session.start_instance(instance, True)
                     if err:
                         sfunc(err)
 

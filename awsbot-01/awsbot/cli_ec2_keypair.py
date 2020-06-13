@@ -24,10 +24,10 @@ def ec2_keypair(session):
 @cli_context
 def list_keypair(session):
     """List All KeyPairs."""
-    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+    aok, err = EC2KeyPairManager(session.get_ec2_session()).\
         list_keypairs()
 
-    if not ok:
+    if not aok:
         print(err)
 
 
@@ -37,10 +37,10 @@ def list_keypair(session):
 @cli_context
 def create_keypair(session, keypair_name, pem_filename):
     """Create KeyPair."""
-    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+    aok, err = EC2KeyPairManager(session.get_ec2_session()).\
         create_keypair(keypair_name, pem_filename)
 
-    if not ok:
+    if not aok:
         print(err)
         return
 
@@ -54,10 +54,10 @@ def create_keypair(session, keypair_name, pem_filename):
 @cli_context
 def import_keypair(session, keypair_name, public_key_file):
     """Import KeyPair."""
-    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+    aok, err = EC2KeyPairManager(session.get_ec2_session()).\
         import_keypair(keypair_name, public_key_file)
 
-    if not ok:
+    if not aok:
         print(err)
         return
 
@@ -69,10 +69,10 @@ def import_keypair(session, keypair_name, public_key_file):
 @cli_context
 def delete_keypair(session, keypair_name):
     """Delete KeyPair."""
-    ok, err = EC2KeyPairManager(session.get_ec2_session()).\
+    aok, err = EC2KeyPairManager(session.get_ec2_session()).\
         delete_keypair(keypair_name)
 
-    if not ok:
+    if not aok:
         print(err)
         return
 

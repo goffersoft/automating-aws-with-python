@@ -39,10 +39,10 @@ def list_hosted_zones(session):
 @cli_context
 def list_resource_record_sets(session, zone, type_filter):
     """List Resource Record Sets."""
-    ok, err = R53DomainManager(session.get_r53_session()).\
+    aok, err = R53DomainManager(session.get_r53_session()).\
         list_resource_record_sets(zone, type_filter)
 
-    if not ok:
+    if not aok:
         print(str(err))
 
 
@@ -91,10 +91,10 @@ def setup_s3_domain(session, bucket_name):
         print(err)
         return
 
-    ok, err = R53DomainManager(session.get_r53_session()).\
+    aok, err = R53DomainManager(session.get_r53_session()).\
         create_s3_domain_record(domain_name, bucket_region)
 
-    if ok:
+    if aok:
         print('Domain Creation Successful!')
         print()
         print(f's3 bucket url : http://{domain_name}')

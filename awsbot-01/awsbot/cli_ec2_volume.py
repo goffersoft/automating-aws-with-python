@@ -31,10 +31,10 @@ def ec2_volume(session):
 @cli_context
 def list_volumes(session, instances, project_name):
     """List volumes associated with all instances."""
-    ok, err = EC2VolumeManager(session.get_ec2_session()).\
+    aok, err = EC2VolumeManager(session.get_ec2_session()).\
         list_volumes(instances, project_name)
 
-    if not ok:
+    if not aok:
         print(err)
 
 

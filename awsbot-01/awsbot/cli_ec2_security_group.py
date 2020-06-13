@@ -29,10 +29,10 @@ def ec2_security_group(session):
 @cli_context
 def list_security_groups(session, groups, long):
     """List All Security groups."""
-    ok, err = EC2SecurityGroupManager(session.get_ec2_session()).\
-        list_security_groups(groups, groups, long)
+    aok, err = EC2SecurityGroupManager(session.get_ec2_session()).\
+        list_security_groups(groups, long)
 
-    if not ok:
+    if not aok:
         print(err)
 
 
@@ -44,11 +44,10 @@ def list_security_groups(session, groups, long):
 @cli_context
 def create_security_groups(session, group_name, vpc_id, description):
     """Create Security group."""
-    ok, err = EC2SecurityGroupManager(session.get_ec2_session()).\
+    _, status = EC2SecurityGroupManager(session.get_ec2_session()).\
         create_security_group(group_name, vpc_id, description)
 
-    if not ok:
-        print(err)
+    print(status)
 
 
 @ec2_security_group.command('delete')
@@ -60,8 +59,8 @@ def delete_security_groups(session, groups):
     Delete security groups associated with (comma separated) groups.
     Can be group ids or group names of a mix of both'.
     """
-    ok, status = EC2SecurityGroupManager(session.get_ec2_session()).\
-        delete_security_groups(groups, groups)
+    _, status = EC2SecurityGroupManager(session.get_ec2_session()).\
+        delete_security_groups(groups)
 
     print(status)
 

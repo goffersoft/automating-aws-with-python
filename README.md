@@ -85,7 +85,13 @@ Commands:
 
     - create  Create Security group.
     - delete  Delete Security group. 
-    - list  List All Security groups.
+    - list    List All Security groups.
+    - rule    - AWS EC2 Security Group Rules Automation Commands.
+
+###### EC2 Security Group Rules
+
+    - create  Create Security Group Rules.
+    - delete  Delete Security Group Rules.
 
 ##### EC2 Volume
 

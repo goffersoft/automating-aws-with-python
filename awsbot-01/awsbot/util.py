@@ -85,11 +85,11 @@ def is_valid_html(html_content, file_type=None, estr=None):
     """Validate the filename or a string passed in as html."""
     try:
         if file_type is None or file_type == 'file':
-            ok, err = is_valid_html_file(html_content)
+            aok, err = is_valid_html_file(html_content)
         else:
-            ok, err = is_valid_html_string(html_content)
+            aok, err = is_valid_html_string(html_content)
 
-        if ok:
+        if aok:
             return True, 'file' if file_type is None else file_type, None
 
         if estr is None:
@@ -105,11 +105,11 @@ def is_valid_json(json_content, file_type=None, estr=None):
     """Validate the filename or a string passed in as json."""
     try:
         if file_type is None or file_type == 'file':
-            ok, err = is_valid_json_file(json_content)
+            aok, err = is_valid_json_file(json_content)
         else:
-            ok, err = is_valid_json_string(json_content)
+            aok, err = is_valid_json_string(json_content)
 
-        if ok:
+        if aok:
             return True, 'file' if file_type is None else file_type, None
 
         if estr is None:
@@ -257,16 +257,30 @@ def getuuid():
 
 def str_to_list(input_str, valid_values=None, delimiter=','):
     """Convert a string to a list."""
+    if not input_str:
+        return None, 'Need input_Str to be specified'
+
     input_list = input_str.split(delimiter)
 
     if not valid_values:
-        return input_list
+        return input_list, None
 
     for item in input_list:
         if item not in valid_values:
             return None, f'{item} not in list of ' + \
                 f'supported values : {valid_values}'
+
     return input_list, None
+
+
+def str_to_set(input_str, valid_values=None, delimiter=','):
+    """Convert a string to a set."""
+    output_list, err = str_to_list(input_str, valid_values, delimiter)
+
+    if not output_list:
+        return None, err
+
+    return set(output_list), None
 
 
 def is_valid_dir_path(path_to_dir):
@@ -304,6 +318,104 @@ def is_valid_file_path(path_to_file):
 def get_utcnow_with_tzinfo():
     """Get utc datetime string with tzinfo."""
     return datetime.datetime.utcnow().astimezone().isoformat()
+
+
+def str_range_to_int(str_range, delimiter='-', wildcard='any'):
+    """Get range specified as <from>-<to> as tuple of ints."""
+    if not str_range:
+        return False, None, None
+
+    try:
+        parts = str_range.split(delimiter)
+
+        if len(parts) > 2:
+            return False, None, None
+
+        if len(parts) == 1:
+            return True, int(parts[0]), None
+
+        lo = int(parts[0])
+        hi = int(parts[1])
+
+        if hi < lo:
+            return False, None, None
+
+        return True, lo, hi
+    except AttributeError:
+        return False, None, None
+    except ValueError:
+        if parts[0] == wildcard:
+            return True, None, None
+        return False, None, None
+
+
+def validate_network_port_range(from_port, to_port, wildcard='any'):
+    """Validate network port numbers."""
+    if from_port and not to_port:
+        to_port = from_port
+    elif to_port and not from_port:
+        from_port = to_port
+
+    if wildcard in (from_port, to_port):
+        from_port = None
+        to_port = None
+
+    if not from_port and not to_port:
+        return True, None, None
+
+    try:
+        if to_port and to_port != -1 and \
+                (to_port <= 0 or to_port >= 65535):
+            return False, None, None
+
+        if from_port and from_port != -1 and \
+                (from_port <= 0 or from_port >= 65535):
+            return False, None, None
+
+        if from_port and to_port and \
+                from_port != -1 and to_port != -1 and \
+                from_port > to_port:
+            return False, None, None
+
+        return True, from_port, to_port
+    except TypeError:
+        return False, None, None
+
+
+def get_dict_from_list(keys, values, def_value_func):
+    """Create a dict from lists of keys and values.
+
+    keys list must be specified.
+    if not enough values, the supplied function
+    will be called to get a value.
+    """
+    if not keys:
+        return None, 'Need Keys to be specified'
+
+    key_list = None
+    value_list = None
+    key_value_dict = None
+
+    if isinstance(keys, str):
+        key_list, err = str_to_list(keys)
+        if not key_list:
+            return None, err
+    else:
+        key_list = keys
+
+    if values and isinstance(values, str):
+        value_list, err = str_to_list(values)
+        if not value_list:
+            return None, err
+    else:
+        value_list = values
+
+    key_value_dict = {key: value_list[index]
+                      if value_list and index < len(value_list)
+                      else def_value_func(key)
+                      for index, key in enumerate(key_list)}
+
+    return key_value_dict, None
 
 
 if __name__ == '__main__':

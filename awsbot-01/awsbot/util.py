@@ -356,7 +356,8 @@ def get_utcnow_with_tzinfo():
     return datetime.datetime.utcnow().astimezone().isoformat()
 
 
-def str_range_to_int(str_range, delimiter='-', wildcard='any'):
+def str_range_to_int(str_range, min_lo=0, max_hi=65535,
+                     delimiter='-', wildcard='any'):
     """Get range specified as <from>-<to> as tuple of ints."""
     if not str_range:
         return False, None, None
@@ -367,54 +368,55 @@ def str_range_to_int(str_range, delimiter='-', wildcard='any'):
         if len(parts) > 2:
             return False, None, None
 
-        if len(parts) == 1:
-            return True, int(parts[0]), None
+        if len(parts) == 1 and parts[0] == wildcard:
+            lo_val = min_lo
+            hi_val = max_hi
+        elif len(parts) == 1:
+            lo_val = int(parts[0])
+            hi_val = lo_val
+        elif parts[0] == wildcard and parts[1] == wildcard:
+            lo_val = min_lo
+            hi_val = max_hi
+        elif parts[0] == wildcard:
+            lo_val = min_lo
+            hi_val = int(parts[1])
+        elif parts[1] == wildcard:
+            lo_val = int(parts[0])
+            hi_val = max_hi
+        else:
+            lo_val = int(parts[0])
+            hi_val = int(parts[1])
 
-        lo = int(parts[0])
-        hi = int(parts[1])
-
-        if hi < lo:
+        if hi_val < lo_val:
             return False, None, None
 
-        return True, lo, hi
-    except AttributeError:
+        if hi_val > max_hi:
+            return False, None, None
+
+        if lo_val < min_lo:
+            return False, None, None
+
+        return True, lo_val, hi_val
+    except (AttributeError, ValueError):
         return False, None, None
-    except ValueError:
-        if parts[0] == wildcard:
-            return True, None, None
-        return False, None, None
 
 
-def validate_network_port_range(from_port, to_port, wildcard='any'):
-    """Validate network port numbers."""
-    if from_port and not to_port:
-        to_port = from_port
-    elif to_port and not from_port:
-        from_port = to_port
-
-    if wildcard in (from_port, to_port):
-        from_port = None
-        to_port = None
-
-    if not from_port and not to_port:
-        return True, None, None
-
+def validate_range(lo_val, hi_val, min_lo=0, max_hi=65535):
+    """Validate Range."""
     try:
-        if to_port and to_port != -1 and \
-                (to_port <= 0 or to_port >= 65535):
+        if lo_val and isinstance(lo_val, str):
+            lo_val = int(lo_val)
+        if lo_val and lo_val < min_lo:
+            return False, None, None
+        if hi_val and isinstance(hi_val, str):
+            hi_val = int(hi_val), None, None
+        if hi_val and hi_val > max_hi:
+            return False, None, None
+        if lo_val and hi_val and hi_val < lo_val:
             return False, None, None
 
-        if from_port and from_port != -1 and \
-                (from_port <= 0 or from_port >= 65535):
-            return False, None, None
-
-        if from_port and to_port and \
-                from_port != -1 and to_port != -1 and \
-                from_port > to_port:
-            return False, None, None
-
-        return True, from_port, to_port
-    except TypeError:
+        return True, lo_val, hi_val
+    except (AttributeError, ValueError):
         return False, None, None
 
 

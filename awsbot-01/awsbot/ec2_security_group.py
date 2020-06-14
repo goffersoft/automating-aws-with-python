@@ -35,8 +35,8 @@ class EC2SecurityGroupManager():
         valid_groups = set()
         sg_list = []
 
-        if groups and isinstance(groups, str):
-            groups, err = util.str_to_set(groups)
+        if groups:
+            groups, err = util.convert_to_set(groups)
             if not groups:
                 return None, err
         else:
@@ -58,7 +58,7 @@ class EC2SecurityGroupManager():
 
             return None, f'Found Invalid Groups : {invalid_groups}'
         except ClientError as client_err:
-            return None, client_err
+            return None, str(client_err)
 
     def list_security_groups(self, groups=None, long=False, pfunc=None):
         """List All Security Groups In This region.
@@ -162,23 +162,50 @@ class EC2SecurityGroupManager():
                 pfunc(security_group, long)
             return True, None
         except ClientError as client_err:
-            return False, client_err
+            return False, str(client_err)
 
-    def create_security_group(self, group_name,
-                              vpc_id, description=None):
-        """Create a Security Group."""
+    def create_security_groups(self, group_names, vpc_ids,
+                               descriptions, sfunc=None):
+        """Create Security Groups."""
+        if not (group_names and vpc_ids):
+            return False, 'Require group_names and vpc_ids'
+
+        group_vpc_id_dict, err = \
+            util.get_dict_from_list(group_names, vpc_ids,
+                                    lambda key, vals: vals[-1], True)
+        if err:
+            return False, err
+
+        group_descr_dict, err = \
+            util.get_dict_from_list(group_names, descriptions,
+                                    lambda key, vals:
+                                    self.ec2_session.
+                                    get_default_description(key))
+        if err:
+            return False, err
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        success_count = 0
+        failure_count = 0
         try:
-            if not description:
-                description = self.ec2_session.\
-                    get_default_description(group_name)
-            self.ec2_session.\
-                get_ec2_resource().\
-                create_security_group(Description=description,
-                                      GroupName=group_name,
-                                      VpcId=vpc_id)
-            return True, 'Success'
+            for group_name, vpc_id in group_vpc_id_dict.items():
+                aok, err = self.\
+                    create_security_group(group_name, vpc_id,
+                                          group_descr_dict[group_name],
+                                          sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
+            return self.ec2_session.get_status(success_count, failure_count)
         except ClientError as client_err:
-            return False, client_err
+            return False, str(client_err)
 
     def delete_security_groups(self, groups, sfunc=None):
         """Delete Security Groups.
@@ -202,7 +229,8 @@ class EC2SecurityGroupManager():
                     get_security_groups(groups, groups):
                 aok, err = self.\
                         delete_security_group(security_group['GroupId'],
-                                              None, sfunc)
+                                              security_group['GroupName'],
+                                              sfunc)
                 if not aok:
                     sfunc(err)
                     failure_count += 1
@@ -210,12 +238,13 @@ class EC2SecurityGroupManager():
                     success_count += 1
             return self.ec2_session.get_status(success_count, failure_count)
         except ClientError as client_err:
-            return False, client_err
+            return False, str(client_err)
 
-    def delete_security_group(self, group_id, group_name, sfunc=None):
-        """Delete a Security Group."""
-        if not group_id and not group_name:
-            return False, "Require group_id or group_name"
+    def create_security_group(self, group_name,
+                              vpc_id, description=None, sfunc=None):
+        """Create a Security Group."""
+        if not group_name and not vpc_id:
+            return False, 'Require group_name and vpc_id'
 
         def default_status(status_str):
             print(status_str)
@@ -224,9 +253,33 @@ class EC2SecurityGroupManager():
             sfunc = default_status
 
         try:
-            if sfunc:
-                group = group_id if group_id else group_name
-                sfunc(f'Deleting Security Group : {group}')
+            if not description:
+                description = self.ec2_session.\
+                    get_default_description(group_name)
+            sfunc(f'Creating Security Group : {group_name} : {vpc_id}')
+            self.ec2_session.\
+                get_ec2_resource().\
+                create_security_group(Description=description,
+                                      GroupName=group_name,
+                                      VpcId=vpc_id)
+            return True, None
+        except ClientError as client_err:
+            return False, str(client_err)
+
+    def delete_security_group(self, group_id, group_name, sfunc=None):
+        """Delete a Security Group."""
+        if not group_id and not group_name:
+            return False, 'Require group_id or group_name'
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
+            sfunc(f'Deleting Security Group : {group_id}' +
+                  f'{" : " + group_name if group_name else ""}')
 
             if group_id:
                 self.ec2_session.get_ec2_client().\
@@ -245,13 +298,15 @@ class EC2SecurityGroupManager():
         group ids or group names passed can be a list or a set
         or a comma separated string.
         """
-        if group_ids and isinstance(group_ids, str):
-            group_ids, err = util.str_to_set(group_ids)
+        if group_ids:
+            group_ids, err = util.\
+                convert_to_list(group_ids, remove_duplicates=True)
             if not group_ids:
                 return False, err
 
-        if group_names and isinstance(group_names, str):
-            group_names, err = util.str_to_set(group_names)
+        if group_names:
+            group_names, err = util.\
+                convert_to_list(group_names, remove_duplicates=True)
             if not group_names:
                 return False, err
 

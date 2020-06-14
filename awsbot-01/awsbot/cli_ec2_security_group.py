@@ -37,15 +37,15 @@ def list_security_groups(session, groups, long):
 
 
 @ec2_security_group.command('create')
-@click.argument('group-name')
-@click.argument('vpc-id')
-@click.option('--description', default=None,
+@click.argument('group-names')
+@click.argument('vpc-ids')
+@click.option('--descriptions', default=None,
               help='short description of the security group')
 @cli_context
-def create_security_groups(session, group_name, vpc_id, description):
-    """Create Security group."""
+def create_security_groups(session, group_names, vpc_ids, descriptions):
+    """Create Security groups."""
     _, status = EC2SecurityGroupManager(session.get_ec2_session()).\
-        create_security_group(group_name, vpc_id, description)
+        create_security_groups(group_names, vpc_ids, descriptions)
 
     print()
     print(status)

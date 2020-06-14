@@ -356,8 +356,7 @@ class EC2SecurityGroupRuleManager():
             sfunc = default_status
 
         try:
-            sg_dict = {}
-            sg_dict = defaultdict(lambda: [], sg_dict)
+            sg_dict = defaultdict(lambda: [])
             rule_match_count = 0
             for group in groups:
                 for rule in self.get_rule_json(group, egress_rule):

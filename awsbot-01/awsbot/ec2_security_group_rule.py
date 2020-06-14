@@ -83,6 +83,9 @@ class EC2SecurityGroupRuleManager():
             group_resources=None,
             icmp_type=None, icmp_code=None):
         """Create a Json Rule Blob."""
+        def default_descr_func(key, vals):
+            self.ec2_sg_manager.get_ec2_session().get_default_description(key)
+
         rule_json = {}
         if ip_protocol == 'any':
             rule_json['IpProtocol'] = '-1'
@@ -97,9 +100,6 @@ class EC2SecurityGroupRuleManager():
                 rule_json['FromPort'] = from_port
             if to_port:
                 rule_json['ToPort'] = to_port
-
-        default_descr_func = self.ec2_sg_manager.get_ec2_session().\
-            get_default_description
 
         if ipv4_cidr:
             ipv4_list, err = self.\
@@ -265,7 +265,6 @@ class EC2SecurityGroupRuleManager():
                    security_groups=None,
                    icmp_type=None, icmp_code=None):
         """Determine if the input fields matches a rule."""
-        print(rule)
         if not rule:
             return False, None
 

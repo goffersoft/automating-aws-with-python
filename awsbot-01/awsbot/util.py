@@ -255,7 +255,8 @@ def getuuid():
     return uuid4()
 
 
-def str_to_list(input_str, valid_values=None, delimiter=','):
+def str_to_list(input_str, valid_values=None, delimiter=',',
+                remove_duplicates=False):
     """Convert a string to a list."""
     if not input_str:
         return None, 'Need input_Str to be specified'
@@ -270,17 +271,52 @@ def str_to_list(input_str, valid_values=None, delimiter=','):
             return None, f'{item} not in list of ' + \
                 f'supported values : {valid_values}'
 
+    if remove_duplicates:
+        input_list, err = remove_duplicates_from_list(input_list)
+        if err:
+            return None, err
+
     return input_list, None
 
 
-def str_to_set(input_str, valid_values=None, delimiter=','):
+def str_to_set(input_str, valid_values=None, delimiter=',',
+               remove_duplicates=False):
     """Convert a string to a set."""
-    output_list, err = str_to_list(input_str, valid_values, delimiter)
+    output_list, err = str_to_list(input_str, valid_values,
+                                   delimiter, remove_duplicates)
 
     if not output_list:
         return None, err
 
     return set(output_list), None
+
+
+def convert_to_list(values, valid_values=None, delimiter=',',
+                    remove_duplicates=False):
+    """Convert a string or a list to a list."""
+    if not values:
+        return None, 'Requre values to convert'
+
+    if isinstance(values, str):
+        values, err = str_to_list(values, valid_values, delimiter)
+        if err:
+            return None, err
+
+    if remove_duplicates:
+        values, err = remove_duplicates_from_list(values)
+        if err:
+            return None, err
+
+    return values, None
+
+
+def convert_to_set(values, valid_values=None, delimiter=','):
+    """Convert a string or a list to a set."""
+    values, err = convert_to_list(values, valid_values, delimiter)
+    if err:
+        return None, err
+
+    return set(values), None
 
 
 def is_valid_dir_path(path_to_dir):
@@ -382,7 +418,22 @@ def validate_network_port_range(from_port, to_port, wildcard='any'):
         return False, None, None
 
 
-def get_dict_from_list(keys, values, def_value_func):
+def remove_duplicates_from_list(input_list):
+    """Remove duplicates, Preserves ordering."""
+    if not input_list:
+        return None, 'Need input_list to be specified'
+    input_set = set(input_list)
+    output_list = []
+    for item in input_list:
+        if item in input_set:
+            output_list.append(item)
+
+    return output_list, None
+
+
+def get_dict_from_list(keys, values, def_value_func,
+                       remove_duplicates=False,
+                       valid_values=None, delimiter=','):
     """Create a dict from lists of keys and values.
 
     keys list must be specified.
@@ -396,23 +447,20 @@ def get_dict_from_list(keys, values, def_value_func):
     value_list = None
     key_value_dict = None
 
-    if isinstance(keys, str):
-        key_list, err = str_to_list(keys)
-        if not key_list:
-            return None, err
-    else:
-        key_list = keys
+    key_list, err = convert_to_list(keys, valid_values,
+                                    delimiter, remove_duplicates)
+    if err:
+        return None, err
 
-    if values and isinstance(values, str):
-        value_list, err = str_to_list(values)
-        if not value_list:
+    if values:
+        value_list, err = convert_to_list(values, valid_values,
+                                          delimiter, remove_duplicates)
+        if err:
             return None, err
-    else:
-        value_list = values
 
     key_value_dict = {key: value_list[index]
                       if value_list and index < len(value_list)
-                      else def_value_func(key)
+                      else def_value_func(key, value_list)
                       for index, key in enumerate(key_list)}
 
     return key_value_dict, None

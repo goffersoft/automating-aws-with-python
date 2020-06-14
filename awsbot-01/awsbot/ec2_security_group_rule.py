@@ -161,7 +161,7 @@ class EC2SecurityGroupRuleManager():
                 return False, err
 
         aok, from_port, to_port = \
-            util.validate_network_port_range(from_port, to_port)
+            util.validate_range(from_port, to_port)
         if not aok:
             return False, f'Invalid Network Ports : {from_port}-{to_port}'
 
@@ -333,8 +333,8 @@ class EC2SecurityGroupRuleManager():
             if not security_groups:
                 return False, err
 
-        aok, _, _ = \
-            util.validate_network_port_range(from_port, to_port)
+        aok, from_port, to_port = \
+            util.validate_range(from_port, to_port)
         if not aok:
             return False, f'Invalid Network Ports : {from_port}-{to_port}'
 

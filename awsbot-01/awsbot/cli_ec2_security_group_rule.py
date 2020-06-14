@@ -129,11 +129,14 @@ def delete_rule(session, groups, egress_rule,
     """
     from_port = None
     to_port = None
-    if port_range != 'ignore':
-        aok, from_port, to_port = util.str_range_to_int(port_range)
-        if not aok:
-            print(f'Invalid port range : {port_range}')
-            return
+    wildcard = ('ignore', 'any')
+    if port_range and port_range not in wildcard:
+        parts = port_range.split(',')
+        if parts[0] not in wildcard:
+            from_port = parts[0]
+
+        if len(parts) >= 2 and parts[1] not in wildcard:
+            to_port = parts[1]
 
     _, status = EC2SecurityGroupRuleManager(
         EC2SecurityGroupManager(session.get_ec2_session())). \

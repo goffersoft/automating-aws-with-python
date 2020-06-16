@@ -111,6 +111,60 @@ def reboot_instances(session, instances, force, project_name):
     print(err)
 
 
+@cli_ec2_instance.command('create')
+@click.argument('image-name')
+@click.argument('instance-type')
+@click.argument('security-groups')
+@click.argument('key-name')
+@click.option('--min-count', type=click.INT, default=1,
+              help='minimum number of instances to create')
+@click.option('--max-count', type=click.INT, default=1,
+              help='maximum number of instances to create')
+@click.option('--subnet-id', default=None,
+              help='vpc to launch instance into')
+@click.option('--user-data-file',
+              default='templates/script/default_script.sh',
+              help='script to run after launcing instance')
+@click.option('--project-name', default=None,
+              help='create all instances with tag:Project:<name>')
+@cli_context
+def create_instances(session, image_name, instance_type,
+                     security_groups, key_name, min_count,
+                     max_count, subnet_id, user_data_file,
+                     project_name):
+    """Create one or more EC2 instances.
+
+    image-name - name of the image.
+    instance-type - type of the instance.
+    key-name - a valid key-name to login to the ec2 isntances.
+    Note : image-names are the same across regions bu the
+           images ids differ from region to region.
+    """
+    _, status = EC2InstanceManager(session.get_ec2_session()).\
+        create_instances(image_name, instance_type, security_groups,
+                         key_name, min_count, max_count, subnet_id,
+                         user_data_file, project_name)
+
+    print()
+    print(status)
+
+
+@cli_ec2_instance.command('terminate')
+@click.option('--instances', default=None,
+              help='terminate the selected instances '
+                   '(instance-ids separated by commas)')
+@click.option('--project-name', default=None,
+              help='delete all instances with tag:Project:<name>')
+@cli_context
+def terminate_instances(session, instances, project_name):
+    """Delete one or more or all EC2 instances."""
+    _, status = EC2InstanceManager(session.get_ec2_session()).\
+        terminate_instances(instances, project_name)
+
+    print()
+    print(status)
+
+
 if __name__ == '__main__':
     cli_ec2_instance_init()
     cli_ec2_instance()

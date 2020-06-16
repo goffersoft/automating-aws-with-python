@@ -136,6 +136,29 @@ class EC2SessionManager():
                 f'couldnot start {instance.id} : {str(client_err)}'
 
     @staticmethod
+    def terminate_instance(instance, wait=True, sfunc=None):
+        """Delete ec2 instance."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
+            sfunc(f'Terminating {instance.id}...')
+
+            instance.terminate()
+
+            if wait:
+                instance.wait_until_terminated()
+
+            return True, None
+        except ClientError as client_err:
+            return False, \
+                f'couldnot terminate {instance.id} : {str(client_err)}'
+
+    @staticmethod
     def is_instance_running(instance):
         """Determine if the instnace is running or not."""
         if instance.state['Name'] == 'running':
@@ -212,6 +235,24 @@ class EC2SessionManager():
         """Get Default Description."""
         return f'{key} created by awsbot on ' + \
                f'{util.get_utcnow_with_tzinfo()}'
+
+    def get_image_id_from_name(self, image_name):
+        """Get EC2 Image Id from Image name."""
+        if not image_name:
+            return None
+
+        image_filter = [{
+            'Name': 'name',
+            'Values': [image_name]
+        }]
+
+        images = list(self.get_ec2_resource().
+                      images.filter(Filters=image_filter))
+
+        if not images:
+            return None
+
+        return images[0].id
 
 
 if __name__ == '__main__':

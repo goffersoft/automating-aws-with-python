@@ -18,7 +18,7 @@ except ImportError:
               help='profile name to use while creating a boto3 session')
 @click.option('--region', default=None,
               help='overide the region name in the aws profile')
-@click.option('--config', default='config/region.csv',
+@click.option('--config', default='config/s3_region.csv',
               help='region config csv file to use')
 @cli_context
 def cli(session, profile, region, config):

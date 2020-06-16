@@ -16,7 +16,8 @@ setup(
     package_data={
         "": ['config/*',
              'templates/policy/*',
-             'templates/www/*'],
+             'templates/www/*',
+             'templates/script/*'],
     },
     include_package_data=True,
     url='https://github.com/goffersoft/automating-aws-with-python',

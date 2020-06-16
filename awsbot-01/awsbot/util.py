@@ -414,7 +414,7 @@ def validate_range(lo_val, hi_val, min_lo=0, max_hi=65535):
             hi_val = int(hi_val)
 
         if hi_val and hi_val > max_hi:
-            return False, None,None
+            return False, None, None
 
         if lo_val and hi_val and hi_val < lo_val:
             return False, None, None

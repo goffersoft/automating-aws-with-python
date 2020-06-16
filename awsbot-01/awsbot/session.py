@@ -10,18 +10,18 @@ class SessionManager():
     """Session Manager Class."""
 
     def __init__(self, profile_name=None, region_name=None,
-                 region_config=None, s3_session=None,
+                 s3_region_config=None, s3_session=None,
                  r53_session=None, acm_session=None,
                  cf_session=None, ec2_session=None):
         """Initialize the session manager class."""
         if profile_name:
             self.init(profile_name, region_name,
-                      region_config, s3_session,
+                      s3_region_config, s3_session,
                       r53_session, acm_session,
                       cf_session, ec2_session)
         else:
             self.session = None
-            self.region_config = region_config
+            self.s3_region_config = s3_region_config
             self.s3_session = s3_session
             self.r53_session = r53_session
             self.acm_session = acm_session
@@ -29,7 +29,7 @@ class SessionManager():
             self.ec2_session = ec2_session
 
     def init(self, profile_name, region_name=None,
-             region_config=None, s3_session=None,
+             s3_region_config=None, s3_session=None,
              r53_session=None, acm_session=None,
              cf_session=None, ec2_session=None):
         """Initialize the class with a new profile_name."""
@@ -39,7 +39,7 @@ class SessionManager():
             self.session = boto3.Session(profile_name=profile_name,
                                          region_name=region_name)
         self.s3_session = s3_session
-        self.region_config = region_config
+        self.s3_region_config = s3_region_config
         self.r53_session = r53_session
         self.acm_session = acm_session
         self.cf_session = cf_session
@@ -117,13 +117,13 @@ class SessionManager():
         """Get the EC2 session."""
         return self.ec2_session
 
-    def get_region_config(self):
+    def get_s3_region_config(self):
         """Get AWS region map."""
-        return self.region_config
+        return self.s3_region_config
 
-    def set_region_config(self, region_config):
+    def set_s3_region_config(self, s3_region_config):
         """Set the AWS region map."""
-        self.region_config = region_config
+        self.s3_region_config = s3_region_config
 
     @staticmethod
     def get_default_region():

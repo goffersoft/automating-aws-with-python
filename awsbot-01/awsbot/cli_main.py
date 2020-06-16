@@ -6,10 +6,10 @@
 import click
 
 try:
-    from awsbot.region_config import RegionConfig
+    from awsbot.s3_region import S3RegionConfig
     from awsbot.cli_context import cli_context
 except ImportError:
-    from region_config import RegionConfig
+    from s3_region import S3RegionConfig
     from cli_context import cli_context
 
 
@@ -26,7 +26,7 @@ def cli(session, profile, region, config):
     region_config = None
 
     try:
-        region_config = RegionConfig(config)
+        region_config = S3RegionConfig(config)
     except FileNotFoundError as file_err:
         print('WARNING : Cannot load s3 endpoints' +
               f'from file {config} : {str(file_err)}')

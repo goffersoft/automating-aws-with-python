@@ -104,15 +104,15 @@ class R53DomainManager():
     def create_s3_domain_record(self, domain_name, bucket_region):
         """Create S3 domain record."""
         if not self.r53_session.get_session().\
-                get_region_config().\
+                get_s3_region_config().\
                 is_valid_region(bucket_region):
             return False, \
                    f'bucket region : {bucket_region} : not supported'
 
         bucket_zone_id, _ = self.r53_session.get_session().\
-            get_region_config().get_zone(bucket_region)
+            get_s3_region_config().get_zone(bucket_region)
         endpoint, _ = self.r53_session.get_session().\
-            get_region_config().get_endpoint(bucket_region)
+            get_s3_region_config().get_endpoint(bucket_region)
 
         return self.create_alias_domain_record(domain_name,
                                                bucket_zone_id,

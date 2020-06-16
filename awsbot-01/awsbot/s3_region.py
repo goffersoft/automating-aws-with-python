@@ -13,10 +13,10 @@ except ImportError:
 Endpoint = namedtuple('Endpont', ['name', 'endpoint', 'zone'])
 
 
-class RegionConfig():
+class S3RegionConfig():
     """class to maintain mapping of region names to s3 endpoints and zones."""
 
-    class __RegionConfig():
+    class __S3RegionConfig():
         """singleton class map region names to s3 endpoints."""
 
         def __init__(self, csvfile='config/region.csv'):
@@ -63,9 +63,9 @@ class RegionConfig():
 
     def __init__(self, csvfile='config/region.csv'):
         """Initialize the Region singleton class."""
-        if not RegionConfig.instance:
-            RegionConfig.instance = \
-                 RegionConfig.__RegionConfig(csvfile)
+        if not S3RegionConfig.instance:
+            S3RegionConfig.instance = \
+                 S3RegionConfig.__S3RegionConfig(csvfile)
 
     def __getattr__(self, name):
         """Delegate getattr requests to the inner class."""

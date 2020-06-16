@@ -129,7 +129,7 @@ class S3SessionManager():
             if err:
                 return None, err
 
-            endpoint, err = self.session.get_region_config().\
+            endpoint, err = self.session.get_s3_region_config().\
                 get_endpoint(region_name)
             if err:
                 return None, err

@@ -7,10 +7,10 @@ Usage: awsbot [OPTIONS] COMMAND [ARGS]...
   Awsbot cli - AWS Automation Tool CLI.
 
 Options:
-  --profile TEXT  profile name to use while creating a boto3 session
-  --region TEXT   overide the region name in the aws profile
-  --config TEXT   region config csv file to use
-  --help          Show this message and exit.
+  --profile TEXT    profile name to use while creating a boto3 session
+  --region TEXT     overide the region name in the aws profile
+  --s3-config TEXT  s3 region config csv file to use
+  --help            Show this message and exit.
 
 Commands:
   acm  - AWS ACM Automation Commands.

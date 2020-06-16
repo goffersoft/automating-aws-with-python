@@ -16,6 +16,8 @@ try:
     from awsbot.cli_ec2_keypair import ec2_keypair
     from awsbot.cli_ec2_security_group import ec2_security_group
     from awsbot.cli_ec2_security_group_rule import ec2_security_group_rule
+    from awsbot.cli_ec2_region import ec2_region
+    from awsbot.cli_ec2_availability_zone import ec2_availability_zone
 except ImportError:
     from cli_main import cli
     from cli_s3 import s3
@@ -29,6 +31,8 @@ except ImportError:
     from cli_ec2_keypair import ec2_keypair
     from cli_ec2_security_group import ec2_security_group
     from cli_ec2_security_group_rule import ec2_security_group_rule
+    from cli_ec2_region import ec2_region
+    from cli_ec2_availability_zone import ec2_availability_zone
 
 
 def cli_init_s3():
@@ -55,6 +59,8 @@ def cli_init_ec2():
     """Initialize awsbot cli for ec2."""
     ec2_volume.add_command(ec2_volume_snapshot)
     ec2_security_group.add_command(ec2_security_group_rule)
+    ec2.add_command(ec2_region)
+    ec2.add_command(ec2_availability_zone)
     ec2.add_command(ec2_security_group)
     ec2.add_command(ec2_keypair)
     ec2.add_command(ec2_volume)

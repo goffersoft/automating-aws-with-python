@@ -74,11 +74,13 @@ Commands:
     - list  List EC2 availability zones.
 
 ##### EC2 Instance 
-
-    - list   List EC2 instances.
-    - reboot Reboot EC2 instances.
-    - start  Start EC2 instances.
-    - stop   Stop EC2 instances.
+    
+    - create     Create one or more EC2 instances.
+    - list       List EC2 instances.
+    - reboot     Reboot EC2 instances.
+    - start      Start EC2 instances.
+    - stop       Stop EC2 instances.
+    - terminate  Delete one or more or all EC2 instances.
 
 ##### EC2 KeyPair
 

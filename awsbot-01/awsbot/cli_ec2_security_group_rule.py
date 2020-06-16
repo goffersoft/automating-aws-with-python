@@ -10,21 +10,29 @@ try:
     from awsbot import util
     from awsbot.ec2_security_group import EC2SecurityGroupManager
     from awsbot.ec2_security_group_rule import EC2SecurityGroupRuleManager
+    from awsbot.ec2_session import EC2SessionManager
 except ImportError:
     from cli_context import cli_context
     import util
     from ec2_security_group import EC2SecurityGroupManager
     from ec2_security_group_rule import EC2SecurityGroupRuleManager
+    from ec2_session import EC2SessionManager
+
+
+def cli_ec2_security_group_rule_init():
+    """Initialize awsbot cli for ec2 security group rules."""
+    pass
 
 
 @click.group('rule')
 @cli_context
-def ec2_security_group_rule(session):
+def cli_ec2_security_group_rule(session=None):
     """- AWS EC2 Security Group Rules Automation Commands."""
-    pass
+    if not session.get_ec2_session():
+        session.set_ec2_session(EC2SessionManager(session))
 
 
-@ec2_security_group_rule.command('create')
+@cli_ec2_security_group_rule.command('create')
 @click.argument('groups')
 @click.option('--egress-rule', is_flag=True,
               help='indicates the rule is an egress rulw. ' +
@@ -87,7 +95,7 @@ def create_rule(session, groups, egress_rule,
     print(status)
 
 
-@ec2_security_group_rule.command('delete')
+@cli_ec2_security_group_rule.command('delete')
 @click.argument('groups')
 @click.option('--egress-rule', is_flag=True,
               help='indicates the rule is an egress rulw. ' +
@@ -151,4 +159,5 @@ def delete_rule(session, groups, egress_rule,
 
 
 if __name__ == '__main__':
-    pass
+    cli_ec2_security_group_rule_init()
+    cli_ec2_security_group_rule()

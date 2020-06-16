@@ -25,14 +25,19 @@ except ImportError:
     from cli_context import cli_context
 
 
-@click.group()
+def cli_cf_init():
+    """Initialize awsbot cli for cf."""
+    pass
+
+
+@click.group('cf')
 @cli_context
-def cf(session):
+def cli_cf(session=None):
     """- AWS Cloud Front Automation Commands."""
     session.set_cf_session(CFSessionManager(session))
 
 
-@cf.command('list-all-distributions')
+@cli_cf.command('list-all-distributions')
 @cli_context
 def list_all_distributions(session):
     """List all distributions."""
@@ -43,7 +48,7 @@ def list_all_distributions(session):
         print(err)
 
 
-@cf.command('list-distribution')
+@cli_cf.command('list-distribution')
 @click.argument('domain-name')
 @cli_context
 def list_distribution(session, domain_name):
@@ -55,7 +60,7 @@ def list_distribution(session, domain_name):
         print(err)
 
 
-@cf.command('setup-s3-cdn')
+@cli_cf.command('setup-s3-cdn')
 @click.argument('domain-name')
 @click.option('--bucket-name', default=None,
               help='s3 bucket name (if different from domain-name)')
@@ -133,4 +138,5 @@ def setup_s3_cdn(session, domain_name, bucket_name, root_object, no_wait):
 
 
 if __name__ == '__main__':
-    pass
+    cli_cf_init()
+    cli_cf()

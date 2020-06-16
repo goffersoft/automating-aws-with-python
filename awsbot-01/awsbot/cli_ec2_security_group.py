@@ -7,20 +7,34 @@ import click
 
 try:
     from awsbot.cli_context import cli_context
+    from awsbot.cli_ec2_security_group_rule import cli_ec2_security_group_rule
+    from awsbot.cli_ec2_security_group_rule \
+        import cli_ec2_security_group_rule_init
     from awsbot.ec2_security_group import EC2SecurityGroupManager
+    from awsbot.ec2_session import EC2SessionManager
 except ImportError:
     from cli_context import cli_context
+    from cli_ec2_security_group_rule import cli_ec2_security_group_rule
+    from cli_ec2_security_group_rule import cli_ec2_security_group_rule_init
     from ec2_security_group import EC2SecurityGroupManager
+    from ec2_session import EC2SessionManager
+
+
+def cli_ec2_security_group_init():
+    """Initialize awsbot cli for ec2 security groups."""
+    cli_ec2_security_group_rule_init()
+    cli_ec2_security_group.add_command(cli_ec2_security_group_rule)
 
 
 @click.group('security-group')
 @cli_context
-def ec2_security_group(session):
+def cli_ec2_security_group(session=None):
     """- AWS EC2 Security Group Automation Commands."""
-    pass
+    if not session.get_ec2_session():
+        session.set_ec2_session(EC2SessionManager(session))
 
 
-@ec2_security_group.command('list')
+@cli_ec2_security_group.command('list')
 @click.option('--groups', default=None,
               help='filter by (comma separated) groups. ' +
               'can be group ids or group names of a mix of both')
@@ -36,7 +50,7 @@ def list_security_groups(session, groups, long):
         print(err)
 
 
-@ec2_security_group.command('create')
+@cli_ec2_security_group.command('create')
 @click.argument('group-names')
 @click.argument('vpc-ids')
 @click.option('--descriptions', default=None,
@@ -51,7 +65,7 @@ def create_security_groups(session, group_names, vpc_ids, descriptions):
     print(status)
 
 
-@ec2_security_group.command('delete')
+@cli_ec2_security_group.command('delete')
 @click.argument('groups')
 @cli_context
 def delete_security_groups(session, groups):
@@ -68,4 +82,5 @@ def delete_security_groups(session, groups):
 
 
 if __name__ == '__main__':
-    pass
+    cli_ec2_security_group_init()
+    cli_ec2_security_group()

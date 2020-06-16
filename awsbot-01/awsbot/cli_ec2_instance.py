@@ -8,19 +8,27 @@ import click
 try:
     from awsbot.cli_context import cli_context
     from awsbot.ec2_instance import EC2InstanceManager
+    from awsbot.ec2_session import EC2SessionManager
 except ImportError:
     from cli_context import cli_context
     from ec2_instance import EC2InstanceManager
+    from ec2_session import EC2SessionManager
+
+
+def cli_ec2_instance_init():
+    """Initialize awsbot cli for ec2 instances."""
+    pass
 
 
 @click.group('instance')
 @cli_context
-def ec2_instance(session):
+def cli_ec2_instance(session=None):
     """- AWS EC2 instances Automation Commands."""
-    pass
+    if not session.get_ec2_session():
+        session.set_ec2_session(EC2SessionManager(session))
 
 
-@ec2_instance.command('list')
+@cli_ec2_instance.command('list')
 @click.option('--instances', default=None,
               help='list the selected instances '
                    '(instance-ids separated by commas)')
@@ -37,7 +45,7 @@ def list_instances(session, instances, project_name):
         print(err)
 
 
-@ec2_instance.command('start')
+@cli_ec2_instance.command('start')
 @click.option('--instances', default=None,
               help='start the selected instances '
                    '(instance-ids separated by commas)')
@@ -59,7 +67,7 @@ def start_instances(session, instances, force, project_name):
     print(err)
 
 
-@ec2_instance.command('stop')
+@cli_ec2_instance.command('stop')
 @click.option('--instances', default=None,
               help='stop the selected instances '
                    '(instance-ids separated by commas)')
@@ -81,7 +89,7 @@ def stop_instances(session, instances, force, project_name):
     print(err)
 
 
-@ec2_instance.command('reboot')
+@cli_ec2_instance.command('reboot')
 @click.option('--instances', default=None,
               help='reboot the selected instances '
                    '(instance-ids separated by commas)')
@@ -104,4 +112,5 @@ def reboot_instances(session, instances, force, project_name):
 
 
 if __name__ == '__main__':
-    pass
+    cli_ec2_instance_init()
+    cli_ec2_instance()

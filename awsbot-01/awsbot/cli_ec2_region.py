@@ -8,19 +8,27 @@ import click
 try:
     from awsbot.cli_context import cli_context
     from awsbot.ec2_region import EC2RegionManager
+    from awsbot.ec2_session import EC2SessionManager
 except ImportError:
     from cli_context import cli_context
     from ec2_region import EC2RegionManager
+    from ec2_session import EC2SessionManager
+
+
+def cli_ec2_region_init():
+    """Initialize awsbot cli for ec2 regions."""
+    pass
 
 
 @click.group('region')
 @cli_context
-def ec2_region(session):
+def cli_ec2_region(session=None):
     """- EC2 region CLI Commands."""
-    pass
+    if not session.get_ec2_session():
+        session.set_ec2_session(EC2SessionManager(session))
 
 
-@ec2_region.command('list')
+@cli_ec2_region.command('list')
 @click.option('--region-names', default=None,
               help='list of (comma separated) region names to list')
 @cli_context
@@ -34,4 +42,5 @@ def list_regions(session, region_names):
 
 
 if __name__ == '__main__':
-    pass
+    cli_ec2_region_init()
+    cli_ec2_region()

@@ -15,17 +15,22 @@ except ImportError:
     from cli_context import cli_context
 
 
-@click.group()
+def cli_s3_init():
+    """Initialize awsbot cli for s3."""
+    pass
+
+
+@click.group('s3')
 @click.option('--chunk-size',
               default=8*1024*1024, type=click.INT,
               help='default s3 transfer chuck size')
 @cli_context
-def s3(session, chunk_size):
+def cli_s3(session=None, chunk_size=None):
     """- AWS S3 Automation Commands."""
     session.set_s3_session(S3SessionManager(session, chunk_size))
 
 
-@s3.command('list-buckets')
+@cli_s3.command('list-buckets')
 @cli_context
 def list_s3_buckets(session):
     """List all S3 buckets."""
@@ -36,7 +41,7 @@ def list_s3_buckets(session):
         print(err)
 
 
-@s3.command('list-bucket-objects')
+@cli_s3.command('list-bucket-objects')
 @click.argument('name', default=None)
 @cli_context
 def list_s3_bucket_objects(session, name):
@@ -48,7 +53,7 @@ def list_s3_bucket_objects(session, name):
         print(err)
 
 
-@s3.command('setup-bucket')
+@cli_s3.command('setup-bucket')
 @click.argument('name', default=None)
 @click.option('--policy-file', default='templates/policy/allow_all.json',
               help='policy filename(contains a json document)\
@@ -77,7 +82,7 @@ def s3_bucket_setup(session, name, policy_file, index_file,
         print(f'Bucket Website Url : {url}')
 
 
-@s3.command('sync-bucket')
+@cli_s3.command('sync-bucket')
 @click.argument('path', default=None, type=click.Path(exists=True))
 @click.argument('name', default=None)
 @click.option('--validate', default=False, is_flag=True,
@@ -100,4 +105,5 @@ def s3_bucket_sync(session, path, name, validate):
 
 
 if __name__ == '__main__':
-    pass
+    cli_s3_init()
+    cli_s3()

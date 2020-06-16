@@ -15,14 +15,19 @@ except ImportError:
     from cli_context import cli_context
 
 
-@click.group()
+def cli_acm_init():
+    """Initialize awsbot cli for acm."""
+    pass
+
+
+@click.group('acm')
 @cli_context
-def acm(session):
+def cli_acm(session=None):
     """- AWS ACM Automation Commands."""
     session.set_acm_session(ACMSessionManager(session))
 
 
-@acm.command('find-cert')
+@cli_acm.command('find-cert')
 @click.argument('domain-name')
 @cli_context
 def find_cert(session, domain_name):
@@ -36,7 +41,7 @@ def find_cert(session, domain_name):
         print(cert)
 
 
-@acm.command('list-certs')
+@cli_acm.command('list-certs')
 @click.option('--status-filter', default='ISSUED',
               help='filter by certificate status. '
               'status can be one or more of '
@@ -61,7 +66,7 @@ def list_certs(session, status_filter):
         print(err)
 
 
-@acm.command('list-cert-keys')
+@cli_acm.command('list-cert-keys')
 @click.argument('cert-arn')
 @cli_context
 def list_cert_keys(session, cert_arn):
@@ -76,7 +81,7 @@ def list_cert_keys(session, cert_arn):
             print(f'{i+1:>2} : {key}')
 
 
-@acm.command('get-cert-details')
+@cli_acm.command('get-cert-details')
 @click.argument('cert-arn')
 @click.option('--cert-filter', default=None,
               help='filter by any primary key '
@@ -99,4 +104,5 @@ def get_cert_details(session, cert_arn, cert_filter):
 
 
 if __name__ == '__main__':
-    pass
+    cli_acm_init()
+    cli_acm()

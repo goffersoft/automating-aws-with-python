@@ -17,14 +17,19 @@ except ImportError:
     from cli_context import cli_context
 
 
-@click.group()
+def cli_r53_init():
+    """Initialize awsbot cli for r53."""
+    pass
+
+
+@click.group('r53')
 @cli_context
-def r53(session):
+def cli_r53(session=None):
     """- AWS Route 53 Automation Commands."""
     session.set_r53_session(R53SessionManager(session))
 
 
-@r53.command('list-hosted-zones')
+@cli_r53.command('list-hosted-zones')
 @cli_context
 def list_hosted_zones(session):
     """List hosted zones."""
@@ -32,7 +37,7 @@ def list_hosted_zones(session):
         list_hosted_zones()
 
 
-@r53.command('list-record-sets')
+@cli_r53.command('list-record-sets')
 @click.argument('zone', default=None)
 @click.option('--type-filter', default=None,
               help='filter by record type')
@@ -46,7 +51,7 @@ def list_resource_record_sets(session, zone, type_filter):
         print(str(err))
 
 
-@r53.command('setup-s3-domain')
+@cli_r53.command('setup-s3-domain')
 @click.argument('bucket_name', default=None)
 @cli_context
 def setup_s3_domain(session, bucket_name):
@@ -104,4 +109,5 @@ def setup_s3_domain(session, bucket_name):
 
 
 if __name__ == '__main__':
-    pass
+    cli_r53_init()
+    cli_r53()

@@ -8,19 +8,27 @@ import click
 try:
     from awsbot.cli_context import cli_context
     from awsbot.ec2_availability_zone import EC2AvailabilityZoneManager
+    from awsbot.ec2_session import EC2SessionManager
 except ImportError:
     from cli_context import cli_context
     from ec2_availability_zone import EC2AvailabilityZoneManager
+    from ec2_session import EC2SessionManager
+
+
+def cli_ec2_availability_zone_init():
+    """Initialize awsbot cli for ec2 availability zones."""
+    pass
 
 
 @click.group('availabilty-zone')
 @cli_context
-def ec2_availability_zone(session):
+def cli_ec2_availability_zone(session=None):
     """- EC2 availability zone CLI Commands."""
-    pass
+    if not session.get_ec2_session():
+        session.set_ec2_session(EC2SessionManager(session))
 
 
-@ec2_availability_zone.command('list')
+@cli_ec2_availability_zone.command('list')
 @cli_context
 def list_availability_zones(session):
     """List EC2 availability zones.
@@ -36,4 +44,5 @@ def list_availability_zones(session):
 
 
 if __name__ == '__main__':
-    pass
+    cli_ec2_availability_zone_init()
+    cli_ec2_availability_zone()

@@ -8,19 +8,27 @@ import click
 try:
     from awsbot.cli_context import cli_context
     from awsbot.ec2_snapshot import EC2SnapshotManager
+    from awsbot.ec2_session import EC2SessionManager
 except ImportError:
     from cli_context import cli_context
     from ec2_snapshot import EC2SnapshotManager
+    from ec2_session import EC2SessionManager
+
+
+def cli_ec2_volume_snapshot_init():
+    """Initialize awsbot cli for ec2 volume snapshots."""
+    pass
 
 
 @click.group('snapshot')
 @cli_context
-def ec2_volume_snapshot(session):
+def cli_ec2_volume_snapshot(session=None):
     """- AWS EC2 volume snapshots Automation Commands."""
-    pass
+    if not session.get_ec2_session():
+        session.set_ec2_session(EC2SessionManager(session))
 
 
-@ec2_volume_snapshot.command('list')
+@cli_ec2_volume_snapshot.command('list')
 @click.option('--instances', default=None,
               help='list volume snapshots for the selected '
                    'instances (instance-ids separated by commas)')
@@ -39,7 +47,7 @@ def list_volume_snapshots(session, instances, project_name, list_all):
         print(err)
 
 
-@ec2_volume_snapshot.command('create')
+@cli_ec2_volume_snapshot.command('create')
 @click.option('--instances', default=None,
               help='create volume snapshots for the selected '
                    'instances (instance-ids separated by commas)')
@@ -60,4 +68,5 @@ def create_volume_snapshots(session, instances, project_name, age):
 
 
 if __name__ == '__main__':
-    pass
+    cli_ec2_volume_snapshot_init()
+    cli_ec2_volume_snapshot()

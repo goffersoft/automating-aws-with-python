@@ -18,18 +18,18 @@ except ImportError:
               help='profile name to use while creating a boto3 session')
 @click.option('--region', default=None,
               help='overide the region name in the aws profile')
-@click.option('--config', default='config/s3_region.csv',
-              help='region config csv file to use')
+@click.option('--s3-config', default='config/s3_region.csv',
+              help='s3 region config csv file to use')
 @cli_context
-def cli(session, profile, region, config):
+def cli(session, profile, region, s3_config):
     """Awsbot cli - AWS Automation Tool CLI."""
     region_config = None
 
     try:
-        region_config = S3RegionConfig(config)
+        region_config = S3RegionConfig(s3_config)
     except FileNotFoundError as file_err:
         print('WARNING : Cannot load s3 endpoints' +
-              f'from file {config} : {str(file_err)}')
+              f'from file {s3_config} : {str(file_err)}')
 
     session.init(profile, region, region_config)
 

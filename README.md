@@ -61,11 +61,17 @@ Options:
   --help  Show this message and exit.
 
 Commands:
-  instance        - AWS EC2 instances Automation Commands.
-  keypair         - AWS EC2 Key Pair Automation Commands.
-  security-group  - AWS EC2 Security Group Automation Commands.
-  volume          - AWS EC2 instance volumes Automation Commands.
+  availabilty-zone  - EC2 availability zone CLI Commands.
+  instance          - AWS EC2 instances Automation Commands.
+  keypair           - AWS EC2 Key Pair Automation Commands.
+  security-group    - AWS EC2 Security Group Automation Commands.
+  region            - EC2 region CLI Commands.
+  volume            - AWS EC2 instance volumes Automation Commands.
 ```
+
+##### EC2 Availability Zone
+
+    - list  List EC2 availability zones.
 
 ##### EC2 Instance 
 
@@ -92,6 +98,10 @@ Commands:
 
     - create  Create Security Group Rules.
     - delete  Delete Security Group Rules.
+
+##### EC2 Region
+
+    - list  List EC2 regions.
 
 ##### EC2 Volume
 

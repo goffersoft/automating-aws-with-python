@@ -159,6 +159,8 @@ class EC2SecurityGroupRuleManager():
                 validate_and_get_security_groups(security_groups)
             if not security_group_resources:
                 return False, err
+        else:
+            security_group_resources = None
 
         aok, from_port, to_port = \
             util.validate_range(from_port, to_port)

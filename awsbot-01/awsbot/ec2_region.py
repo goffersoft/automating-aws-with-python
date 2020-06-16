@@ -47,8 +47,7 @@ class EC2RegionManager():
                 return False, err
 
         for region in self.ec2_session.get_ec2_client().\
-                describe_regions(
-                    RegionNames=region_names)['Regions']:
+                describe_regions(RegionNames=region_names)['Regions']:
             yield region
 
         return True, None

@@ -4,7 +4,8 @@
 """S3 Bucket Manager class."""
 
 from pathlib import Path
-
+from botocore.exceptions import ClientError
+from botocore.exceptions import EndpointConnectionError
 
 try:
     from awsbot import util
@@ -21,16 +22,24 @@ class S3BucketManager():
 
     def list_buckets(self, pfunc=lambda bucket: print(bucket)):
         """List S3 Buckets Associated with this account."""
-        for bucket in self.s3_session.get_s3_bucket_resources():
-            pfunc(bucket)
+        try:
+            for bucket in self.s3_session.get_s3_bucket_resources():
+                pfunc(bucket)
+            return True, None
+        except (ClientError, EndpointConnectionError) as client_error:
+            return False, str(client_error)
 
     def list_bucket_objects(self, bucket_name,
                             pfunc=lambda object: print(object)):
         """List S3 Objects Associated with this S3 Bucket."""
-        for obj in self.s3_session.\
-                get_s3_bucket_resource(bucket_name).\
-                objects.all():
-            pfunc(obj)
+        try:
+            for obj in self.s3_session.\
+                    get_s3_bucket_resource(bucket_name).\
+                    objects.all():
+                pfunc(obj)
+            return True, None
+        except (ClientError, EndpointConnectionError) as client_error:
+            return False, str(client_error)
 
     def setup_bucket(self, name, policy_file, index_file,
                      index_name, error_file, error_name):

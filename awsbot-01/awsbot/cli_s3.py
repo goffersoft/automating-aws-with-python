@@ -29,7 +29,11 @@ def s3(session, chunk_size):
 @cli_context
 def list_s3_buckets(session):
     """List all S3 buckets."""
-    S3BucketManager(session.get_s3_session()).list_buckets()
+    aok, err = S3BucketManager(session.get_s3_session()).\
+        list_buckets()
+
+    if not aok:
+        print(err)
 
 
 @s3.command('list-bucket-objects')
@@ -37,7 +41,11 @@ def list_s3_buckets(session):
 @cli_context
 def list_s3_bucket_objects(session, name):
     """List all S3 bucket objects associated with bucket name."""
-    S3BucketManager(session.get_s3_session()).list_bucket_objects(name)
+    aok, err = S3BucketManager(session.get_s3_session()).\
+        list_bucket_objects(name)
+
+    if not aok:
+        print(err)
 
 
 @s3.command('setup-bucket')

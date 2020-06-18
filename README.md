@@ -77,6 +77,7 @@ Commands:
     
     - create     Create one or more EC2 instances.
     - list       List EC2 instances.
+    - modify     Modify EC2 instances.
     - reboot     Reboot EC2 instances.
     - start      Start EC2 instances.
     - stop       Stop EC2 instances.

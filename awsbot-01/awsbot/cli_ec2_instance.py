@@ -165,6 +165,29 @@ def terminate_instances(session, instances, project_name):
     print(status)
 
 
+@cli_ec2_instance.command('modify')
+@click.option('--instances', default=None,
+              help='modify the selected instances '
+                   '(instance-ids separated by commas)')
+@click.option('--security-groups', default=None,
+              help='modify all ec2 instances for all projects')
+@click.option('--enable-source-dest-check/--disable-source-dest-check',
+              is_flag=True, default=None,
+              help='enable or disable source destination check')
+@click.option('--project-name', default=None,
+              help='modify all instances for project tag:Project:<name>')
+@cli_context
+def modify_instances(session, instances, security_groups,
+                     enable_source_dest_check, project_name):
+    """Modify EC2 instances."""
+    _, err = EC2InstanceManager(session.get_ec2_session()).\
+        modify_instances(instances, security_groups,
+                         enable_source_dest_check, project_name)
+
+    print()
+    print(err)
+
+
 if __name__ == '__main__':
     cli_ec2_instance_init()
     cli_ec2_instance()

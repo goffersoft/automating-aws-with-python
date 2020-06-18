@@ -137,7 +137,7 @@ class EC2SessionManager():
 
     @staticmethod
     def terminate_instance(instance, wait=True, sfunc=None):
-        """Delete ec2 instance."""
+        """Terminate ec2 instance."""
 
         def default_status(status_str):
             print(status_str)
@@ -157,6 +157,34 @@ class EC2SessionManager():
         except ClientError as client_err:
             return False, \
                 f'couldnot terminate {instance.id} : {str(client_err)}'
+
+    @staticmethod
+    def modify_instance(instance, security_group_id_list,
+                        source_dest_check_flag, sfunc=None):
+        """Modify ec2 instance."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
+            if security_group_id_list:
+                sfunc(f'Modifying {instance.id}...' +
+                      f'Groups={security_group_id_list}')
+                instance.modify_attribute(Groups=security_group_id_list)
+
+            if source_dest_check_flag is not None:
+                sfunc(f'Modifying {instance.id}...' +
+                      f'SourceDestCheck={source_dest_check_flag}')
+                instance.modify_attribute(
+                    SourceDestCheck={'Value': source_dest_check_flag})
+
+            return True, None
+        except ClientError as client_err:
+            return False, \
+                f'couldnot modify instance {instance.id} : {str(client_err)}'
 
     @staticmethod
     def is_instance_running(instance):

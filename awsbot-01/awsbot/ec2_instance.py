@@ -218,6 +218,41 @@ class EC2InstanceManager():
 
         return self.ec2_session.get_status(success_count, failure_count)
 
+    def modify_instances(self, instances, security_groups,
+                         source_dest_check_flag,
+                         project_name=None, sfunc=None):
+        """Modify EC2 Instances."""
+        if security_groups:
+            security_groups, err =\
+                EC2SecurityGroupManager(self.ec2_session).\
+                validate_and_get_security_groups(security_groups)
+
+            if err:
+                return err
+
+            security_groups = [group['GroupId'] for group in security_groups]
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        success_count = 0
+        failure_count = 0
+        for inst in self.ec2_session.\
+                get_instances(instances, project_name):
+            aok, err = self.\
+                ec2_session.modify_instance(inst, security_groups,
+                                            source_dest_check_flag, sfunc)
+            if not aok:
+                sfunc(err)
+                failure_count += 1
+            else:
+                success_count += 1
+
+        return self.ec2_session.get_status(success_count, failure_count)
+
 
 if __name__ == '__main__':
     pass

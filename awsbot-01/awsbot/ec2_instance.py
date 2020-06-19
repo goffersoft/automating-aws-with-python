@@ -28,13 +28,45 @@ class EC2InstanceManager():
         and/or instanceIds
         """
         def default_print(inst):
+            print()
+            print(f'{80 * "*"}')
+            print()
+
             tags = self.ec2_session.get_instance_tags(inst)
-            print(','.join((inst.id,
-                            inst.instance_type,
-                            inst.public_dns_name,
-                            inst.placement['AvailabilityZone'],
-                            inst.state['Name'],
-                            'Project='+tags.get('Project', '<no-project>'))))
+            image_name = self.ec2_session.get_image_name_from_id(inst.image_id)
+            security_group_names = \
+                ', '.join([sg['GroupName'] for sg in inst.security_groups])
+            sd_check = 'SourceDestCheck Enabled' \
+                if inst.source_dest_check \
+                else 'SourceDestCheck Disabled'
+            public_ip = 'N/A' \
+                if not inst.public_ip_address \
+                else inst.public_ip_address
+            private_ip = 'N/A' \
+                if not inst.private_ip_address \
+                else inst.private_ip_address
+            private_dns = 'N/A' \
+                if not inst.private_dns_name \
+                else inst.private_dns_name
+            public_dns = 'N/A' \
+                if not inst.public_dns_name \
+                else inst.public_dns_name
+
+            print(' | '.join((inst.id,
+                              inst.image_id,
+                              image_name,
+                              inst.instance_type,
+                              public_ip,
+                              private_ip,
+                              public_dns,
+                              private_dns,
+                              inst.key_name,
+                              inst.vpc_id,
+                              inst.placement['AvailabilityZone'],
+                              security_group_names,
+                              sd_check,
+                              inst.state['Name'],
+                              'Project='+tags.get('Project', '<no-project>'))))
 
         if not pfunc:
             pfunc = default_print

@@ -282,6 +282,24 @@ class EC2SessionManager():
 
         return images[0].id
 
+    def get_image_name_from_id(self, image_id):
+        """Get EC2 Image name from Image id."""
+        if not image_id:
+            return None
+
+        image_filter = [{
+            'Name': 'image-id',
+            'Values': [image_id]
+        }]
+
+        images = list(self.get_ec2_resource().
+                      images.filter(Filters=image_filter))
+
+        if not images:
+            return None
+
+        return images[0].name
+
 
 if __name__ == '__main__':
     pass

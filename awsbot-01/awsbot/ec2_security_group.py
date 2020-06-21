@@ -60,7 +60,8 @@ class EC2SecurityGroupManager():
         except ClientError as client_err:
             return None, str(client_err)
 
-    def list_security_groups(self, groups=None, long=False, pfunc=None):
+    def list_security_groups(self, groups=None,
+                             long_version=False, pfunc=None):
         """List All Security Groups In This region.
 
         groups can be a (comma separated) string or a collection
@@ -120,13 +121,13 @@ class EC2SecurityGroupManager():
                           f'| {prefix} | {group["GroupId"]}')
                     sub_rule_index = sub_rule_index + 1
 
-        def default_print(security_group, long):
+        def default_print(security_group, long_version):
             nonlocal index
             if index == 1:
                 print('listing security groups for : ' +
                       f'{self.ec2_session.session.get_region_name()}')
 
-            if long:
+            if long_version:
                 print('*' * 80)
 
             print(f'[{index}] : ' +
@@ -136,7 +137,7 @@ class EC2SecurityGroupManager():
                   f'{security_group["Description"]} - ' +
                   f'{security_group.get("Tags", [])}')
 
-            if long:
+            if long_version:
                 rule_index = 1
                 print()
                 print('    Ingress-Rules')
@@ -159,7 +160,7 @@ class EC2SecurityGroupManager():
         try:
             for security_group in \
                     self.get_security_groups(groups, groups):
-                pfunc(security_group, long)
+                pfunc(security_group, long_version)
             return True, None
         except ClientError as client_err:
             return False, str(client_err)

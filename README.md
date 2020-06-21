@@ -15,6 +15,7 @@ Options:
 Commands:
   acm  - AWS ACM Automation Commands.
   cf   - AWS Cloud Front Automation Commands.
+  cw   - AWS Cloudwatch Automation Commands.
   ec2  - AWS EC2 Automation Commands.
   r53  - AWS Route 53 Automation Commands.
   s3   - AWS S3 Automation Commands.
@@ -50,6 +51,23 @@ Commands:
     - list-all-distributions  List all distributions.
     - list-distribution       List distribution matching domain name.
     - setup-s3-cdn            Create s3 cloud front distribution.
+
+#### Cloud Watch
+```
+Usage: awsbot.py cw [OPTIONS] COMMAND [ARGS]...
+
+  - AWS Cloudwatch Automation Commands.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  alarm  - CloudWatch alarm cli commands.
+```
+
+##### Cloud Watch Alarms
+
+    - list  List cloudwatch alarms.
 
 #### EC2
 ```
@@ -112,5 +130,6 @@ Commands:
     - snapshot  - AWS EC2 volume snapshots Automation Commands.
 
 ###### EC2 Volume Snapshot
+
     - create  Create volume snapshots associated with selected instances.  
     - list    List snapshots associated with all volumes.

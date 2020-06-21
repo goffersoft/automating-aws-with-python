@@ -14,13 +14,15 @@ class SessionManager():
                  s3_region_config='config/s3_region.csv',
                  s3_session=None,
                  r53_session=None, acm_session=None,
-                 cf_session=None, ec2_session=None):
+                 cf_session=None, ec2_session=None,
+                 cw_session=None):
         """Initialize the session manager class."""
         if profile_name:
             self.init(profile_name, region_name,
                       s3_region_config, s3_session,
                       r53_session, acm_session,
-                      cf_session, ec2_session)
+                      cf_session, ec2_session,
+                      cw_session)
         else:
             self.session = None
             self.s3_region_config = s3_region_config
@@ -29,11 +31,13 @@ class SessionManager():
             self.acm_session = acm_session
             self.cf_session = cf_session
             self.ec2_session = ec2_session
+            self.cw_session = cw_session
 
     def init(self, profile_name, region_name=None,
              s3_region_config=None, s3_session=None,
              r53_session=None, acm_session=None,
-             cf_session=None, ec2_session=None):
+             cf_session=None, ec2_session=None,
+             cw_session=None):
         """Initialize the class with a new profile_name."""
         if region_name is None:
             self.session = boto3.Session(profile_name=profile_name)
@@ -46,6 +50,7 @@ class SessionManager():
         self.acm_session = acm_session
         self.cf_session = cf_session
         self.ec2_session = ec2_session
+        self.cw_session = cw_session
 
     def get_session(self):
         """Get session."""
@@ -118,6 +123,14 @@ class SessionManager():
     def get_ec2_session(self):
         """Get the EC2 session."""
         return self.ec2_session
+
+    def set_cw_session(self, cw_session):
+        """Set the Cloud Watch session."""
+        self.cw_session = cw_session
+
+    def get_cw_session(self):
+        """Get the Cloud Watch session."""
+        return self.cw_session
 
     def get_s3_region_config(self):
         """Get AWS region map."""

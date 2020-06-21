@@ -18,6 +18,8 @@ try:
     from awsbot.cli_cf import cli_cf_init
     from awsbot.cli_ec2 import cli_ec2
     from awsbot.cli_ec2 import cli_ec2_init
+    from awsbot.cli_cw import cli_cw
+    from awsbot.cli_cw import cli_cw_init
 except ImportError:
     from s3_region import S3RegionConfig
     from cli_context import cli_context
@@ -31,6 +33,8 @@ except ImportError:
     from cli_cf import cli_cf_init
     from cli_ec2 import cli_ec2
     from cli_ec2 import cli_ec2_init
+    from cli_cw import cli_cw
+    from cli_cw import cli_cw_init
 
 
 def cli_init():
@@ -52,6 +56,9 @@ def cli_init():
 
     cli_s3_init()
     cli.add_command(cli_s3)
+
+    cli_cw_init()
+    cli.add_command(cli_cw)
 
 
 @click.group()

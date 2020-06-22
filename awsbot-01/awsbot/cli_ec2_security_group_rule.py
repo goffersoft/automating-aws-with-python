@@ -44,12 +44,12 @@ def cli_ec2_security_group_rule(session=None):
               help='port ranges(or a single port) to allow. ' +
               'Port ranges specified as <fromPort>-<toPort>.' +
               'Use "any" to specify all ports')
-@click.option('--ipv4-cidr', default='0.0.0.0/0',
+@click.option('--ipv4-cidr', default=None,
               help='ipv4 address(comma separated cidr blocks) to allow')
 @click.option('--ipv4-descriptions', default=None,
               help='descriptions(comma separated) associated with ' +
               'ipv4 cidr blocks')
-@click.option('--ipv6-cidr', default='::/0',
+@click.option('--ipv6-cidr', default=None,
               help='ipv4 address(comma separated cidr blocks) to allow')
 @click.option('--ipv6-descriptions', default=None,
               help='descriptions(comma separated) associated with ' +

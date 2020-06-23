@@ -196,7 +196,8 @@ class EC2SessionManager():
     @staticmethod
     def modify_instance(instance, security_group_id_list,
                         source_dest_check_flag, user_data,
-                        instance_name, sfunc=None):
+                        instance_name, base64_encode=False,
+                        sfunc=None):
         """Modify ec2 instance."""
 
         def default_status(status_str):
@@ -225,19 +226,28 @@ class EC2SessionManager():
             if user_data:
                 stopped = False
                 if EC2SessionManager.is_instance_running(instance):
-                    EC2SessionManager.stop_instance(instance, sfunc=sfunc)
-                    stopped = True
+                    aok, err = \
+                        EC2SessionManager.stop_instance(instance, sfunc=sfunc)
+                    if aok:
+                        stopped = True
+                    else:
+                        return False, err
 
-                user_data_str = EC2SessionManager.\
+                user_data_bytes = EC2SessionManager.\
                     USER_DATA_MIME_HEADER + user_data
-                user_data_bytes = util.get_base64_encoding(user_data_str)
+                if base64_encode:
+                    user_data_bytes = \
+                        util.get_base64_encoding(user_data_bytes)
                 sfunc(f'Modifying {instance.id}...' +
                       f'UserData={user_data}')
                 instance.modify_attribute(
                     UserData={'Value': user_data_bytes})
 
                 if stopped:
-                    EC2SessionManager.start_instance(instance, sfunc=sfunc)
+                    aok, err = \
+                        EC2SessionManager.start_instance(instance, sfunc=sfunc)
+                    if err:
+                        return False, err
 
             return True, None
         except ClientError as client_err:

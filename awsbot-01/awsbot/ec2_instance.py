@@ -108,17 +108,20 @@ class EC2InstanceManager():
 
         success_count = 0
         failure_count = 0
-        for inst in self.ec2_session.\
-                get_instances(instance_ids, project_name,
-                              states='terminated', include_states=False):
-            aok, err = self.ec2_session.start_instance(inst, False, sfunc)
-            if not aok:
-                sfunc(err)
-                failure_count += 1
-            else:
-                success_count += 1
+        try:
+            for inst in self.ec2_session.\
+                    get_instances(instance_ids, project_name,
+                                  states='terminated', include_states=False):
+                aok, err = self.ec2_session.start_instance(inst, False, sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
 
-        return self.ec2_session.get_status(success_count, failure_count)
+            return self.ec2_session.get_status(success_count, failure_count)
+        except ClientError as client_err:
+            return False, str(client_err)
 
     def stop_instances(self, instance_ids=None,
                        project_name=None, sfunc=None):
@@ -132,17 +135,20 @@ class EC2InstanceManager():
 
         success_count = 0
         failure_count = 0
-        for inst in self.ec2_session.\
-                get_instances(instance_ids, project_name,
-                              states='terminated', include_states=False):
-            aok, err = self.ec2_session.stop_instance(inst, False, sfunc)
-            if not aok:
-                sfunc(err)
-                failure_count += 1
-            else:
-                success_count += 1
+        try:
+            for inst in self.ec2_session.\
+                    get_instances(instance_ids, project_name,
+                                  states='terminated', include_states=False):
+                aok, err = self.ec2_session.stop_instance(inst, False, sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
 
-        return self.ec2_session.get_status(success_count, failure_count)
+            return self.ec2_session.get_status(success_count, failure_count)
+        except ClientError as client_err:
+            return False, str(client_err)
 
     def reboot_instances(self, instance_ids=None,
                          project_name=None, sfunc=None):
@@ -156,29 +162,33 @@ class EC2InstanceManager():
 
         success_count = 0
         failure_count = 0
-        for inst in self.ec2_session.\
-                get_instances(instance_ids, project_name,
-                              states='terminated', include_states=False):
-            aok, err = self.ec2_session.stop_instance(inst, True, sfunc)
-            if not aok:
-                sfunc(err)
-                failure_count += 1
-            else:
-                success_count += 1
+        try:
+            for inst in self.ec2_session.\
+                    get_instances(instance_ids, project_name,
+                                  states='terminated', include_states=False):
+                aok, err = self.ec2_session.stop_instance(inst, True, sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
 
-            aok, err = self.ec2_session.start_instance(inst, False, sfunc)
-            if not aok:
-                sfunc(err)
-                failure_count += 1
-            else:
-                success_count += 1
+                aok, err = self.ec2_session.start_instance(inst, False, sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
+        except ClientError as client_err:
+            return False, str(client_err)
 
         return self.ec2_session.get_status(success_count, failure_count)
 
     def create_instances(self, image_name, instance_type, security_groups,
-                         key_name, min_count, max_count, subnet_id,
-                         user_data, user_data_file,
-                         project_name, instance_name):
+                         key_name, min_count=1, max_count=1, subnet_id=None,
+                         user_data=False, user_data_file=None,
+                         project_name=None, instance_name=None,
+                         base64_encode=False):
         """Create EC2 Instances."""
         if not key_name:
             return False, 'Require key_name'
@@ -259,8 +269,11 @@ class EC2InstanceManager():
             if err:
                 return False, err
 
-            param_dict['UserData'] = \
-                util.get_base64_encoding(user_data_file)
+            if base64_encode:
+                user_data_file = \
+                    util.get_base64_encoding(user_data_file)
+
+            param_dict['UserData'] = user_data_file
 
         try:
             instances = self.ec2_session.get_ec2_resource().\
@@ -283,17 +296,21 @@ class EC2InstanceManager():
 
         success_count = 0
         failure_count = 0
-        for inst in self.ec2_session.\
-                get_instances(instances, project_name,
-                              states='terminated', include_states=False):
-            aok, err = self.ec2_session.terminate_instance(inst, False, sfunc)
-            if not aok:
-                sfunc(err)
-                failure_count += 1
-            else:
-                success_count += 1
+        try:
+            for inst in self.ec2_session.\
+                    get_instances(instances, project_name,
+                                  states='terminated', include_states=False):
+                aok, err = \
+                    self.ec2_session.terminate_instance(inst, False, sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
 
-        return self.ec2_session.get_status(success_count, failure_count)
+            return self.ec2_session.get_status(success_count, failure_count)
+        except ClientError as client_err:
+            return False, str(client_err)
 
     def modify_instances(self, instances, security_groups,
                          source_dest_check_flag,
@@ -331,32 +348,40 @@ class EC2InstanceManager():
         success_count = 0
         failure_count = 0
         index = 0
-        for inst in self.ec2_session.\
-                get_instances(instances, project_name,
-                              states='terminated', include_states=False):
-            instance_name = None \
-                if not instance_names or index >= len(instance_names) \
-                else instance_names[index]
-            if not instance_name:
-                tags = self.ec2_session.get_instance_tags(inst)
-                instance_name = tags.get('Name')
-            if user_data:
-                user_data_file = self.update_user_data(user_data_file,
-                                                       instance_name)
-            aok, err = self.\
-                ec2_session.modify_instance(inst, security_groups,
-                                            source_dest_check_flag,
-                                            user_data_file, instance_name,
-                                            sfunc)
-            if not aok:
-                sfunc(err)
-                failure_count += 1
-            else:
-                success_count += 1
+        user_data_file_template = user_data_file
+        try:
+            for inst in self.ec2_session.\
+                    get_instances(instances, project_name,
+                                  states='terminated', include_states=False):
+                instance_name = None \
+                    if not instance_names or index >= len(instance_names) \
+                    else instance_names[index]
+                if not instance_name:
+                    tags = self.ec2_session.get_instance_tags(inst)
+                    instance_name = tags.get('Name')
+                if user_data:
+                    user_data_file = \
+                        self.update_user_data(user_data_file_template,
+                                              instance_name)
+                else:
+                    user_data_file = None
 
-            index += 1
+                aok, err = self.\
+                    ec2_session.modify_instance(inst, security_groups,
+                                                source_dest_check_flag,
+                                                user_data_file, instance_name,
+                                                False, sfunc)
+                if not aok:
+                    sfunc(err)
+                    failure_count += 1
+                else:
+                    success_count += 1
 
-        return self.ec2_session.get_status(success_count, failure_count)
+                index += 1
+
+            return self.ec2_session.get_status(success_count, failure_count)
+        except ClientError as client_err:
+            return False, str(client_err)
 
     @staticmethod
     def get_user_data_as_string(user_data_file):

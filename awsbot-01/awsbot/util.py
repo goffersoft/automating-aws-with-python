@@ -3,6 +3,7 @@
 
 """Utility functions."""
 
+import base64
 import datetime
 from uuid import uuid4
 import csv
@@ -13,6 +14,17 @@ import hashlib
 from pathlib import Path
 import html5lib
 from html5lib.html5parser import ParseError
+
+
+def get_base64_encoding(data_as_str):
+    """Get base64 encoded string."""
+    if not data_as_str:
+        return data_as_str
+
+    data_as_bytes = data_as_str.encode('ascii')
+    data_as_bytes = base64.b64encode(data_as_bytes)
+
+    return data_as_bytes
 
 
 def get_file_as_string(filename):

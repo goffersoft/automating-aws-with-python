@@ -6,7 +6,7 @@
 import click
 
 try:
-    from awsot.cli_context import cli_context
+    from awsbot.cli_context import cli_context
     from awsbot.cw_session import CWSessionManager
     from awsbot.cw_alarm import CWAlarmManager
 except ImportError:

@@ -35,11 +35,18 @@ def cli_ec2_instance(session=None):
 @click.option('--project-name', default=None,
               help='list all instances for '
                    'project tag:Project:<name>')
+@click.option('--states', default=None,
+              help='interesting instance states to '
+                   'include or exclude')
+@click.option('--include-states/--exclude-states', default=None,
+              help='instance states to include or '
+                   'exclude in the listing')
 @cli_context
-def list_instances(session, instances, project_name):
+def list_instances(session, instances, project_name,
+                   states, include_states):
     """List EC2 instances."""
     aok, err = EC2InstanceManager(session.get_ec2_session()).\
-        list_instances(instances, project_name)
+        list_instances(instances, project_name, states, include_states)
 
     if not aok:
         print(err)
@@ -122,16 +129,20 @@ def reboot_instances(session, instances, force, project_name):
               help='maximum number of instances to create')
 @click.option('--subnet-id', default=None,
               help='vpc to launch instance into')
+@click.option('--user-data', is_flag=True,
+              help='use the specified script to initialize instance')
 @click.option('--user-data-file',
-              default='templates/script/default_script.sh',
-              help='script to run after launcing instance')
+              default='templates/script/www_script.sh',
+              help='script to run after launching instance')
 @click.option('--project-name', default=None,
               help='create all instances with tag:Project:<name>')
+@click.option('--instance-name', default=None,
+              help='name of the instance')
 @cli_context
 def create_instances(session, image_name, instance_type,
                      security_groups, key_name, min_count,
-                     max_count, subnet_id, user_data_file,
-                     project_name):
+                     max_count, subnet_id, user_data,
+                     user_data_file, project_name, instance_name):
     """Create one or more EC2 instances.
 
     image-name - name of the image.
@@ -143,7 +154,8 @@ def create_instances(session, image_name, instance_type,
     _, status = EC2InstanceManager(session.get_ec2_session()).\
         create_instances(image_name, instance_type, security_groups,
                          key_name, min_count, max_count, subnet_id,
-                         user_data_file, project_name)
+                         user_data, user_data_file,
+                         project_name, instance_name)
 
     print()
     print(status)
@@ -170,19 +182,32 @@ def terminate_instances(session, instances, project_name):
               help='modify the selected instances '
                    '(instance-ids separated by commas)')
 @click.option('--security-groups', default=None,
-              help='modify all ec2 instances for all projects')
+              help='change the security groups associated with '
+                   'the instances')
 @click.option('--enable-source-dest-check/--disable-source-dest-check',
               is_flag=True, default=None,
               help='enable or disable source destination check')
+@click.option('--user-data', is_flag=True,
+              help='modify the script to initialize instance')
+@click.option('--user-data-file',
+              default='templates/script/www_script.sh',
+              help='new script to run after launching instance')
 @click.option('--project-name', default=None,
               help='modify all instances for project tag:Project:<name>')
+@click.option('--instance-names', default=None,
+              help='modify the selected instances '
+                   '(instance-names separated by commas)')
 @cli_context
 def modify_instances(session, instances, security_groups,
-                     enable_source_dest_check, project_name):
+                     enable_source_dest_check, user_data,
+                     user_data_file, project_name,
+                     instance_names):
     """Modify EC2 instances."""
     _, err = EC2InstanceManager(session.get_ec2_session()).\
         modify_instances(instances, security_groups,
-                         enable_source_dest_check, project_name)
+                         enable_source_dest_check,
+                         user_data, user_data_file,
+                         project_name, instance_names)
 
     print()
     print(err)

@@ -3,6 +3,7 @@
 
 """EC2 Session Manager Class."""
 
+import sys
 import datetime
 
 from botocore.exceptions import ClientError
@@ -16,9 +17,18 @@ except ImportError:
 class EC2SessionManager():
     """EC2 Session Manager Class."""
 
+    USER_DATA_MIME_HEADER_FILE = 'templates/script/mime_part.sh'
+    USER_DATA_MIME_HEADER = None
+    INSTANCE_STATES = frozenset({'pending', 'running', 'shutting-down',
+                                 'terminated', 'stopping', 'stopped'})
+
     def __init__(self, session):
         """Initialize the EC2 Session MAnager class."""
         self.session = session
+        EC2SessionManager.USER_DATA_MIME_HEADER, err = \
+            util.get_file_as_string(self.USER_DATA_MIME_HEADER_FILE)
+        if err:
+            sys.exit(err)
 
     def get_ec2_resource(self):
         """Get ec2 resource."""
@@ -47,33 +57,58 @@ class EC2SessionManager():
         """Get ec2 'DescribeSecurityGroups' paginator."""
         return self.get_ec2_paginator('describe_security_groups')[0]
 
-    def get_instances(self, instance_ids=None, project_name=None):
+    def get_instances(self, instance_ids=None, project_name=None,
+                      states=None, include_states=None):
         """Get instances associated with resource.
 
         Conditionally filter by project name
         and/or instanceIds
+
+        Also filter by intersting states.
+        include_states = None => list all instances
+                                 regardless of state.
+        include_states = True => list all instances
+                                 whose state matches
+                                 any state in the states
+                                 variable.
+        include_states = False => list all instances
+                                  whose state doesnot match
+                                  any state in the states
+                                  variable.
         """
-        if project_name is None and instance_ids is None:
+        params_dict = {}
+
+        if instance_ids:
+            params_dict['InstanceIds'], err = \
+                util.str_to_list(instance_ids, remove_duplicates=True)
+            if err:
+                return None
+
+        if project_name:
+            params_dict['Filters'] = \
+                [{'Name': 'tag:Project', 'Values': [project_name]}]
+
+        if states and include_states is not None:
+            states, err = util.str_to_set(states)
+            if err:
+                return None
+            if not include_states:
+                states = self.INSTANCE_STATES - states
+            filters = params_dict.get('Filters', [])
+            filters.append({'Name': 'instance-state-name',
+                            'Values': list(states)})
+            params_dict['Filters'] = filters
+
+        if not params_dict:
             return list(self.get_ec2_resource().instances.all())
 
-        if project_name is None and instance_ids is not None:
-            return list(self.get_ec2_resource()
-                        .instances.filter(InstanceIds=instance_ids.split(',')))
-
-        if project_name is not None:
-            filter_config = [{'Name': 'tag:Project', 'Values': [project_name]}]
-
-        if project_name is not None and instance_ids is None:
-            return list(self.get_ec2_resource().
-                        instances.filter(Filters=filter_config))
-
-        return list(self.get_ec2_resource().
-                    instances.filter(Filters=filter,
-                                     InstanceIds=instance_ids.split(',')))
+        return list(self.get_ec2_resource().instances.filter(**params_dict))
 
     def get_volumes(self, instance_ids=None, project_name=None):
         """Iterate over volumes associated with instances."""
-        for inst in self.get_instances(instance_ids, project_name):
+        for inst in self.get_instances(instance_ids, project_name,
+                                       states='terminated',
+                                       include_states=False):
             for volume in inst.volumes.all():
                 yield inst, volume
 
@@ -160,7 +195,8 @@ class EC2SessionManager():
 
     @staticmethod
     def modify_instance(instance, security_group_id_list,
-                        source_dest_check_flag, sfunc=None):
+                        source_dest_check_flag, user_data,
+                        instance_name, sfunc=None):
         """Modify ec2 instance."""
 
         def default_status(status_str):
@@ -180,6 +216,28 @@ class EC2SessionManager():
                       f'SourceDestCheck={source_dest_check_flag}')
                 instance.modify_attribute(
                     SourceDestCheck={'Value': source_dest_check_flag})
+
+            if instance_name:
+                instance.create_tags(
+                    Tags=[{'Key': 'Name',
+                           'Value': instance_name}])
+
+            if user_data:
+                stopped = False
+                if EC2SessionManager.is_instance_running(instance):
+                    EC2SessionManager.stop_instance(instance, sfunc=sfunc)
+                    stopped = True
+
+                user_data_str = EC2SessionManager.\
+                    USER_DATA_MIME_HEADER + user_data
+                user_data_bytes = util.get_base64_encoding(user_data_str)
+                sfunc(f'Modifying {instance.id}...' +
+                      f'UserData={user_data}')
+                instance.modify_attribute(
+                    UserData={'Value': user_data_bytes})
+
+                if stopped:
+                    EC2SessionManager.start_instance(instance, sfunc=sfunc)
 
             return True, None
         except ClientError as client_err:

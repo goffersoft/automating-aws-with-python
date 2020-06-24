@@ -188,6 +188,7 @@ class EC2InstanceManager():
                          key_name, min_count=1, max_count=1, subnet_id=None,
                          user_data=False, user_data_file=None,
                          project_name=None, instance_name=None,
+                         iam_instance_profile_arn=None,
                          base64_encode=False):
         """Create EC2 Instances."""
         if not key_name:
@@ -275,6 +276,10 @@ class EC2InstanceManager():
 
             param_dict['UserData'] = user_data_file
 
+        if iam_instance_profile_arn:
+            param_dict['IamInstanceProfile'] = \
+                {'Arn': iam_instance_profile_arn}
+
         try:
             instances = self.ec2_session.get_ec2_resource().\
                 create_instances(**param_dict)
@@ -318,7 +323,9 @@ class EC2InstanceManager():
                          project_name=None, instance_names=None,
                          sfunc=None):
         """Modify EC2 Instances."""
+        modify_flag = False
         if security_groups:
+            modify_flag = True
             security_groups, err =\
                 EC2SecurityGroupManager(self.ec2_session).\
                 validate_and_get_security_groups(security_groups)
@@ -329,15 +336,20 @@ class EC2InstanceManager():
             security_groups = [group['GroupId'] for group in security_groups]
 
         if user_data:
+            modify_flag = True
             user_data_file, err = self.\
                 get_user_data_as_string(user_data_file)
             if err:
                 return False, err
 
         if instance_names:
+            modify_flag = True
             instance_names, err = util.convert_to_list(instance_names)
             if not instance_names:
                 return False, err
+
+        if not modify_flag:
+            return False, 'Nothing to modify'
 
         def default_status(status_str):
             print(status_str)

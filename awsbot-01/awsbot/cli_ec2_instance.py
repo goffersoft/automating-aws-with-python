@@ -138,11 +138,14 @@ def reboot_instances(session, instances, force, project_name):
               help='create all instances with tag:Project:<name>')
 @click.option('--instance-name', default=None,
               help='name of the instance')
+@click.option('--iam-instance-profile-arn', default=None,
+              help='iam instance profile arn')
 @cli_context
 def create_instances(session, image_name, instance_type,
                      security_groups, key_name, min_count,
                      max_count, subnet_id, user_data,
-                     user_data_file, project_name, instance_name):
+                     user_data_file, project_name, instance_name,
+                     iam_instance_profile_arn):
     """Create one or more EC2 instances.
 
     image-name - name of the image.
@@ -155,7 +158,8 @@ def create_instances(session, image_name, instance_type,
         create_instances(image_name, instance_type, security_groups,
                          key_name, min_count, max_count, subnet_id,
                          user_data, user_data_file,
-                         project_name, instance_name)
+                         project_name, instance_name,
+                         iam_instance_profile_arn)
 
     print()
     print(status)

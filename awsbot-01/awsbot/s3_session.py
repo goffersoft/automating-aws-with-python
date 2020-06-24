@@ -59,6 +59,18 @@ class S3SessionManager():
         except KeyError as key_error:
             return None, str(key_error)
 
+    def get_s3_waiter(self, name):
+        """Get s3 waiter."""
+        try:
+            waiter = self.get_s3_client().get_waiter(name)
+            return waiter, None
+        except ValueError as value_error:
+            return None, str(value_error)
+
+    def get_s3_bucket_exists_waiter(self):
+        """Get s3 'BucketExists' waiter."""
+        return self.get_s3_waiter('bucket_exists')[0]
+
     def get_s3_list_bucket_v2_paginator(self):
         """Get s3 'ListObjectsV2' paginator."""
         return self.get_s3_paginator('list_objects_v2')[0]
@@ -225,6 +237,8 @@ class S3SessionManager():
                                    CreateBucketConfiguration={
                                        'LocationConstraint':
                                        bucket_region})
+
+            self.get_s3_bucket_exists_waiter().wait(Bucket=name)
 
             aok, err = self.create_s3_bucket_policy(bucket, policy, False)
 

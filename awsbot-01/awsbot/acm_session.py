@@ -13,8 +13,7 @@ class ACMSessionManager():
 
     def get_acm_client(self):
         """Get acm client."""
-        return self.session.\
-            get_client('acm', self.session.get_default_region())
+        return self.session.get_client('acm')
 
     def get_session(self):
         """Get session."""

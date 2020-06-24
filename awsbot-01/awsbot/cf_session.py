@@ -18,8 +18,7 @@ class CFSessionManager():
 
     def get_cf_client(self):
         """Get cloud front client."""
-        return self.session.\
-            get_client('cloudfront')
+        return self.session.get_client('cloudfront')
 
     def get_session(self):
         """Get session."""
@@ -71,7 +70,6 @@ class CFSessionManager():
                                       origin_id=None,
                                       comment_string='Created by AwsBot'):
         """Create the json blob for cloud front dist config."""
-        print(s3_bucket_domain)
         if not origin_id:
             origin_id = f'S3-{domain_name}'
 

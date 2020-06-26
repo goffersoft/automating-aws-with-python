@@ -57,6 +57,11 @@ class EC2SessionManager():
         """Get ec2 'DescribeSecurityGroups' paginator."""
         return self.get_ec2_paginator('describe_security_groups')[0]
 
+    def get_describe_iam_instance_profile_associations_paginator(self):
+        """Get ec2 'DescribeIamInstanceProfileAssociations' paginator."""
+        return self.\
+            get_ec2_paginator('describe_iam_instance_profile_associations')[0]
+
     def get_instances(self, instance_ids=None, project_name=None,
                       states=None, include_states=None):
         """Get instances associated with resource.
@@ -64,7 +69,7 @@ class EC2SessionManager():
         Conditionally filter by project name
         and/or instanceIds
 
-        Also filter by intersting states.
+        Also filter by interesting states.
         include_states = None => list all instances
                                  regardless of state.
         include_states = True => list all instances
@@ -194,11 +199,10 @@ class EC2SessionManager():
                 f'couldnot terminate {instance.id} : {str(client_err)}'
 
     @staticmethod
-    def modify_instance(instance, security_group_id_list,
-                        source_dest_check_flag, user_data,
-                        instance_name, base64_encode=False,
-                        sfunc=None):
-        """Modify ec2 instance."""
+    def modify_instance_security_groups(instance,
+                                        security_group_id_list=None,
+                                        sfunc=None):
+        """Modify ec2 instance security groups."""
 
         def default_status(status_str):
             print(status_str)
@@ -212,17 +216,68 @@ class EC2SessionManager():
                       f'Groups={security_group_id_list}')
                 instance.modify_attribute(Groups=security_group_id_list)
 
-            if source_dest_check_flag is not None:
-                sfunc(f'Modifying {instance.id}...' +
-                      f'SourceDestCheck={source_dest_check_flag}')
-                instance.modify_attribute(
-                    SourceDestCheck={'Value': source_dest_check_flag})
+            return True, None
+        except ClientError as client_err:
+            return False, \
+                f'couldnot modify instance {instance.id} : {str(client_err)}'
 
+    @staticmethod
+    def modify_instance_src_dest_check_flag(instance,
+                                            src_dest_check_flag=None,
+                                            sfunc=None):
+        """Modify ec2 instance src dest check flag."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
+            if src_dest_check_flag is not None:
+                sfunc(f'Modifying {instance.id}...' +
+                      f'SourceDestCheck={src_dest_check_flag}')
+                instance.modify_attribute(
+                    SourceDestCheck={'Value': src_dest_check_flag})
+
+            return True, None
+        except ClientError as client_err:
+            return False, \
+                f'couldnot modify instance {instance.id} : {str(client_err)}'
+
+    @staticmethod
+    def modify_instance_name(instance, instance_name=None, sfunc=None):
+        """Modify ec2 instance name."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
             if instance_name:
                 instance.create_tags(
                     Tags=[{'Key': 'Name',
                            'Value': instance_name}])
 
+            return True, None
+        except ClientError as client_err:
+            return False, \
+                f'couldnot modify instance {instance.id} : {str(client_err)}'
+
+    @staticmethod
+    def modify_instance_user_data(instance, user_data=None,
+                                  base64_encode=False, sfunc=None):
+        """Modify ec2 instance user data."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
             if user_data:
                 stopped = False
                 if EC2SessionManager.is_instance_running(instance):
@@ -248,11 +303,110 @@ class EC2SessionManager():
                         EC2SessionManager.start_instance(instance, sfunc=sfunc)
                     if err:
                         return False, err
-
             return True, None
         except ClientError as client_err:
             return False, \
                 f'couldnot modify instance {instance.id} : {str(client_err)}'
+
+    def modify_instance_iam_role(self, instance,
+                                 iam_instance_profile_arn=None,
+                                 attach_iam_role=None, sfunc=None):
+        """Modify ec2 instance iam role."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        try:
+            assoc_id = None
+            iam_role_arn = None
+            attach_role = False
+            detach_role = False
+            reattach_orig = False
+
+            for assoc in self.get_ec2_iam_roles(instance.id):
+                assoc_id = assoc['AssociationId']
+                iam_role_arn = assoc['IamInstanceProfile']['Arn']
+
+            if attach_iam_role and iam_instance_profile_arn and \
+                    iam_instance_profile_arn != iam_role_arn:
+                attach_role = True
+                if assoc_id:
+                    detach_role = True
+            elif attach_iam_role is False:
+                detach_role = True
+
+            if detach_role:
+                self.get_ec2_client().\
+                    disassociate_iam_instance_profile(
+                        AssociationId=assoc_id)
+                reattach_orig = True
+
+            if attach_role:
+                self.get_ec2_client().\
+                    associate_iam_instance_profile(
+                        InstanceId=instance.id,
+                        IamInstanceProfile={'Arn': iam_instance_profile_arn})
+
+            return True, None
+        except ClientError as client_err:
+            if reattach_orig:
+                self.get_ec2_client().\
+                    associate_iam_instance_profile(
+                        InstanceId=instance.id,
+                        IamInstanceProfile={'Arn': iam_role_arn})
+            return False, \
+                f'couldnot modify instance {instance.id} : {str(client_err)}'
+
+    def modify_instance(self, instance, security_group_id_list=None,
+                        src_dest_check_flag=None, user_data=None,
+                        instance_name=None,
+                        iam_instance_profile_arn=None,
+                        attach_iam_role=None,
+                        base64_encode=False,
+                        sfunc=None):
+        """Modify ec2 instance."""
+
+        def default_status(status_str):
+            print(status_str)
+
+        if not sfunc:
+            sfunc = default_status
+
+        err_list = []
+        _, err = self.modify_instance_security_groups(instance,
+                                                      security_group_id_list,
+                                                      sfunc)
+        if err:
+            err_list.append(err)
+
+        _, err = self.modify_instance_src_dest_check_flag(instance,
+                                                          src_dest_check_flag,
+                                                          sfunc)
+        if err:
+            err_list.append(err)
+
+        _, err = self.modify_instance_name(instance, instance_name, sfunc)
+        if err:
+            err_list.append(err)
+
+        _, err = self.modify_instance_user_data(instance, user_data,
+                                                base64_encode, sfunc)
+        if err:
+            err_list.append(err)
+
+        _, err = self.modify_instance_iam_role(instance,
+                                               iam_instance_profile_arn,
+                                               attach_iam_role, sfunc)
+        if err:
+            err_list.append(err)
+
+        if err_list:
+            return False, ' | '.join(err_list)
+
+        return True, None
 
     @staticmethod
     def is_instance_running(instance):
@@ -367,6 +521,29 @@ class EC2SessionManager():
             return None
 
         return images[0].name
+
+    def get_ec2_iam_roles(self, instance_ids=None):
+        """Iterate over iam roles."""
+        roles_filter = []
+        if instance_ids:
+            instance_ids, err = \
+                util.str_to_list(instance_ids, remove_duplicates=True)
+            if err:
+                return None
+
+            roles_filter = [{
+                'Name': 'instance-id',
+                'Values': instance_ids
+            }]
+
+        paginator = \
+            self.get_describe_iam_instance_profile_associations_paginator()
+
+        for page in paginator.paginate(Filters=roles_filter):
+            for assoc in page['IamInstanceProfileAssociations']:
+                yield assoc
+
+        return None
 
 
 if __name__ == '__main__':

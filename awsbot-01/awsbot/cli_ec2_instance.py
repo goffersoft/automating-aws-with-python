@@ -201,17 +201,23 @@ def terminate_instances(session, instances, project_name):
 @click.option('--instance-names', default=None,
               help='modify the selected instances '
                    '(instance-names separated by commas)')
+@click.option('--iam-instance-profile-arn', default=None,
+              help='iam instance profile arn to attach')
+@click.option('--attach-iam-role/--detach-iam-role', default=None,
+              help='attach new iam role or detach the existing iam role')
 @cli_context
 def modify_instances(session, instances, security_groups,
                      enable_source_dest_check, user_data,
                      user_data_file, project_name,
-                     instance_names):
+                     instance_names, iam_instance_profile_arn,
+                     attach_iam_role):
     """Modify EC2 instances."""
     _, err = EC2InstanceManager(session.get_ec2_session()).\
         modify_instances(instances, security_groups,
                          enable_source_dest_check,
                          user_data, user_data_file,
-                         project_name, instance_names)
+                         project_name, instance_names,
+                         iam_instance_profile_arn, attach_iam_role)
 
     print()
     print(err)

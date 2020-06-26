@@ -27,7 +27,7 @@ class EC2InstanceManager():
 
         Conditionally filter by project name
         and/or instanceIds
-        Also filter by intersting states.
+        Also filter by interesting states.
         include_states = None => list all instances
                                  regardless of state.
         include_states = True => list all instances
@@ -48,9 +48,9 @@ class EC2InstanceManager():
             image_name = self.ec2_session.get_image_name_from_id(inst.image_id)
             security_group_names = \
                 ', '.join([sg['GroupName'] for sg in inst.security_groups])
-            sd_check = 'SourceDestCheck Enabled' \
+            sd_check = 'Enabled' \
                 if inst.source_dest_check \
-                else 'SourceDestCheck Disabled'
+                else 'Disabled'
             public_ip = 'N/A' \
                 if not inst.public_ip_address \
                 else inst.public_ip_address
@@ -65,23 +65,27 @@ class EC2InstanceManager():
                 else inst.public_dns_name
             instance_name = tags.get('Name', 'N/A')
             vpc_id = 'N/A' if not inst.vpc_id else inst.vpc_id
+            iam_role_arn = 'N/A' if not inst.iam_instance_profile \
+                           else inst.iam_instance_profile.get('Arn', 'N/A')
 
-            print(' | '.join((inst.id,
-                              instance_name,
-                              inst.image_id,
-                              image_name,
-                              inst.instance_type,
-                              public_ip,
-                              private_ip,
-                              public_dns,
-                              private_dns,
-                              inst.key_name,
-                              vpc_id,
-                              inst.placement['AvailabilityZone'],
-                              security_group_names,
-                              sd_check,
-                              inst.state['Name'],
-                              'Project='+tags.get('Project', '<no-project>'))))
+            print(' | '.join((
+                f'instance-id={inst.id}',
+                f'instance-name={instance_name}',
+                f'image-id={inst.image_id}',
+                f'image-name={image_name}',
+                f'instance-type={inst.instance_type}',
+                f'public-ip={public_ip}',
+                f'private-ip={private_ip}',
+                f'public-dns={public_dns}',
+                f'private-dns={private_dns}',
+                f'key-name={inst.key_name}',
+                f'vpc-id={vpc_id}',
+                f'iam-role-arn={iam_role_arn}',
+                f'availability-zone={inst.placement["AvailabilityZone"]}',
+                f'security-groups={security_group_names}',
+                f'source-dest-check={sd_check}',
+                f'state={inst.state["Name"]}',
+                f'tags=Project={tags.get("Project", "<no-project>")}')))
 
         if not pfunc:
             pfunc = default_print
@@ -321,6 +325,8 @@ class EC2InstanceManager():
                          source_dest_check_flag,
                          user_data, user_data_file,
                          project_name=None, instance_names=None,
+                         iam_instance_profile_arn=None,
+                         attach_iam_role=None,
                          sfunc=None):
         """Modify EC2 Instances."""
         modify_flag = False
@@ -347,6 +353,13 @@ class EC2InstanceManager():
             instance_names, err = util.convert_to_list(instance_names)
             if not instance_names:
                 return False, err
+
+        if attach_iam_role and \
+                not iam_instance_profile_arn:
+            return False, 'Require an iam instance profile arn'
+
+        if attach_iam_role is not None:
+            modify_flag = True
 
         if not modify_flag:
             return False, 'Nothing to modify'
@@ -382,7 +395,10 @@ class EC2InstanceManager():
                     ec2_session.modify_instance(inst, security_groups,
                                                 source_dest_check_flag,
                                                 user_data_file, instance_name,
-                                                False, sfunc)
+                                                iam_instance_profile_arn,
+                                                attach_iam_role,
+                                                base64_encode=False,
+                                                sfunc=sfunc)
                 if not aok:
                     sfunc(err)
                     failure_count += 1

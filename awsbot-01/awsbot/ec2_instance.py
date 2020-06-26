@@ -211,7 +211,7 @@ class EC2InstanceManager():
             EC2SecurityGroupManager(self.ec2_session).\
             validate_and_get_security_groups(security_groups)
         if err:
-            return err
+            return False, err
         security_groups = [group['GroupId'] for group in security_groups]
 
         image_id = self.ec2_session.\

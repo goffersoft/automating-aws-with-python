@@ -66,7 +66,7 @@ def cli_init():
               help='profile name to use while creating a boto3 session')
 @click.option('--region', default=None,
               help='overide the region name in the aws profile')
-@click.option('--s3-config', default='config/s3_region.csv',
+@click.option('--s3-config', default='resources/config/s3_region.csv',
               help='s3 region config csv file to use')
 @cli_context
 def cli(session=None, profile=None, region=None, s3_config=None):

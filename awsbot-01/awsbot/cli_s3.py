@@ -55,14 +55,17 @@ def list_s3_bucket_objects(session, name):
 
 @cli_s3.command('setup-bucket')
 @click.argument('name', default=None)
-@click.option('--policy-file', default='templates/policy/allow_all.json',
+@click.option('--policy-file',
+              default='resources/templates/policy/allow_all.json',
               help='policy filename(contains a json document)\
                     or a json policy string')
-@click.option('--index_file', default='templates/www/index.html',
+@click.option('--index_file',
+              default='resources/templates/www/index.html',
               help='filename(contains a html document) or a html string')
 @click.option('--index_name', default='index.html',
               help='name to use for the index s3 object')
-@click.option('--error_file', default='templates/www/error.html',
+@click.option('--error_file',
+              default='resources/templates/www/error.html',
               help='filename(contains a html document) or a html string')
 @click.option('--error_name', default='error.html',
               help='name to use for the error s3 object')

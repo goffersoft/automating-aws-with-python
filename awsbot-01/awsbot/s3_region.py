@@ -19,12 +19,12 @@ class S3RegionConfig():
     class __S3RegionConfig():
         """singleton class map region names to s3 endpoints."""
 
-        def __init__(self, csvfile='config/s3_region.csv'):
+        def __init__(self, csvfile='resources/config/s3_region.csv'):
             """Initialize the region_endpoints dictionary."""
             self.region_endpoints = {}
             self.init(csvfile)
 
-        def init(self, csvfile='config/s3_region.csv'):
+        def init(self, csvfile='resources/config/s3_region.csv'):
             """Initialize the region_endpoints dictionary."""
             save = self.region_endpoints
             self.region_endpoints = {}
@@ -61,7 +61,7 @@ class S3RegionConfig():
 
     instance = None
 
-    def __init__(self, csvfile='config/s3_region.csv'):
+    def __init__(self, csvfile='resources/config/s3_region.csv'):
         """Initialize the Region singleton class."""
         if not S3RegionConfig.instance:
             S3RegionConfig.instance = \

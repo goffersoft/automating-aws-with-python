@@ -11,7 +11,7 @@ class SessionManager():
 
     def __init__(self, profile_name='python_automation',
                  region_name=None,
-                 s3_region_config='config/s3_region.csv',
+                 s3_region_config='resources/config/s3_region.csv',
                  s3_session=None,
                  r53_session=None, acm_session=None,
                  cf_session=None, ec2_session=None,

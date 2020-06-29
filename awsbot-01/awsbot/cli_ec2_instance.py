@@ -132,7 +132,7 @@ def reboot_instances(session, instances, force, project_name):
 @click.option('--user-data', is_flag=True,
               help='use the specified script to initialize instance')
 @click.option('--user-data-file',
-              default='templates/script/www_script.sh',
+              default='resources/templates/script/www_script.sh',
               help='script to run after launching instance')
 @click.option('--project-name', default=None,
               help='create all instances with tag:Project:<name>')
@@ -194,7 +194,7 @@ def terminate_instances(session, instances, project_name):
 @click.option('--user-data', is_flag=True,
               help='modify the script to initialize instance')
 @click.option('--user-data-file',
-              default='templates/script/www_script.sh',
+              default='resources/templates/script/www_script.sh',
               help='new script to run after launching instance')
 @click.option('--project-name', default=None,
               help='modify all instances for project tag:Project:<name>')

@@ -17,7 +17,7 @@ except ImportError:
 class EC2SessionManager():
     """EC2 Session Manager Class."""
 
-    USER_DATA_MIME_HEADER_FILE = 'templates/script/mime_part.sh'
+    USER_DATA_MIME_HEADER_FILE = 'resources/templates/script/mime_part.sh'
     USER_DATA_MIME_HEADER = None
     INSTANCE_STATES = frozenset({'pending', 'running', 'shutting-down',
                                  'terminated', 'stopping', 'stopped'})

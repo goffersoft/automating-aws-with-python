@@ -1,0 +1,8 @@
+serverless create --template aws-python3 --name notbot-notifier
+or
+
+sls create -t aws-python3 -n nobot-notifier
+
+sls deploy
+sls invoke -f hello
+sls logs -f hello

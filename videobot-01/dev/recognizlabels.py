@@ -18,3 +18,6 @@ for entry in response['Labels']:
     
 for entry in response['Labels']:
     print(entry['Label']['Name'])
+
+data['Records'][0]['s3']['bucket']['name']
+data['Records'][0]['s3']['object']['key']

@@ -26,6 +26,30 @@ provider:
   stage: dev-us-east-1
   profile: ${file(../config/config.${self:provider.stage}.json):videolyzer.aws_profile_name}
   region: ${file(../config/config.${self:provider.stage}.json):videolyzer.aws_region_name}
+  iamRoleStatements:  
+    - Effect: "Allow"
+      Action:
+        - "rekognition:*"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:GetObject"
+      Resource: 
+        - Fn::Join:
+          - ''
+          - - ${self:custom.videos-bucket-arn}
+            - '/*'
+
+custom:
+  videos-bucket-arn:
+    Fn::Join:
+      - ':'
+      - - arn
+        - aws
+        - s3
+        - ''
+        - ''
+        - ${file(../config/config.${self:provider.stage}.json):videolyzer.videos_s3_bucket_name}
 
 # you can overwrite defaults here
 #  stage: dev

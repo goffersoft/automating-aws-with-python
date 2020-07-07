@@ -202,7 +202,10 @@ class S3SessionManager():
 
         try:
             pages = paginator.paginate(Bucket=bucket_name)
+
             for page in pages:
+                if not page.get('Contents'):
+                    continue
                 for meta in page['Contents']:
                     metadata[meta['Key']] = meta['ETag']
             return metadata, None

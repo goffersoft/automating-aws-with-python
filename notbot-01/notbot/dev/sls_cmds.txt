@@ -4,5 +4,7 @@ or
 sls create -t aws-python3 -n nobot-notifier
 
 sls deploy
-sls invoke -f hello
-sls logs -f hello
+sls invoke -f post-to-slack
+sls logs -f post-to-slack
+sls plugin install -n serverless-python-requirements
+

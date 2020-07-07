@@ -21,10 +21,13 @@ service: notbot-notifier
 # frameworkVersion: "=X.X.X"
 
 provider:
+  stage: dev-us-east-1
   name: aws
-  runtime: python3.8
-  profile: python_automation
-  region: us-east-1
+  runtime: python3.7
+  profile: ${file(../config/config.${self:provider.stage}.json):notifier.aws_profile_name}
+  region: ${file(../config/config.${self:provider.stage}.json):notifier.aws_region_name}
+  environment:
+    SLACK_WEBHOOK_URL: ${file(../config/config.${self:provider.stage}.json):notifier.slack_webhook_url}
 
 # you can overwrite defaults here
 #  stage: dev
@@ -60,8 +63,8 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
+  post-to-slack:
+    handler: handler.post_to_slack
     events:
       - cloudwatchEvent:
           event:
@@ -124,3 +127,6 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+plugins:
+  - serverless-python-requirements

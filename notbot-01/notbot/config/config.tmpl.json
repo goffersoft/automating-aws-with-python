@@ -1,0 +1,7 @@
+{
+    "notifier": {
+        "slack_webhook_url": "<slack-webhook-url>",
+        "aws_profile_name": "<aws-rpfofile-name>",
+        "aws_region_name": "<aws-region-name>"
+    }
+}

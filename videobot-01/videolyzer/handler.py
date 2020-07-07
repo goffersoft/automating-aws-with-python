@@ -26,7 +26,8 @@ def start_processing_video(event, context):
     Main Entry point for the AWS LAmbda Function
     """
     if not event.get('Records'):
-        print(f'No Records to process {event}')
+        print(f'No Records to process : {event}')
+        return
 
     for record in event['Records']:
         start_label_detection(

@@ -39,8 +39,31 @@ provider:
           - ''
           - - ${self:custom.videos-bucket-arn}
             - '/*'
+    - Effect: "Allow"
+      Action:
+        - iam:GetRole
+        - iam:PassRole
+      Resource:
+        Fn::GetAtt:
+          - RekognitionSNSPublishRole
+          - Arn 
+  environment:
+    REKOGNITION_SNS_TOPIC_ARN: ${self:custom.rekognition-sns-topic-arn}
+    REKOGNITION_SNS_ROLE_ARN:
+      Fn::GetAtt:
+        - RekognitionSNSPublishRole
+        - Arn
 
 custom:
+  rekognition-sns-topic-arn:
+    Fn::Join:
+      - ':'
+      - - arn
+        - aws
+        - sns
+        - Ref: AWS::Region
+        - Ref: AWS::AccountId
+        - handleLabelDetectionTopic
   videos-bucket-arn:
     Fn::Join:
       - ':'
@@ -93,6 +116,11 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - suffix: .mp4
+  handle-label-detection:
+    handler: handler.handle_label_detection
+    events:
+      - sns: handleLabelDetectionTopic
+
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details
@@ -144,3 +172,28 @@ functions:
 #     NewOutput:
 #       Description: "Description for the output"
 #       Value: "Some output value"
+
+resources:
+  Resources:
+    RekognitionSNSPublishRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - rekognition.amazonaws.com 
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: RekognitionSNSPublishPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement: 
+                - Effect: Allow
+                  Action:
+                    - sns:Publish
+                  Resource: ${self:custom.rekognition-sns-topic-arn}
+

@@ -13,6 +13,11 @@ def get_rekognition_client():
     return boto3.client('rekognition')
 
 
+def get_dynamodb_resource():
+    """Get client for the dynamodb service."""
+    return boto3.resource('dynamodb')
+
+
 def start_label_detection(bucket_name, object_name):
     """Analyse video by callig rekognition label detection service."""
     print('processing video to detect labels in : ' +
@@ -123,10 +128,40 @@ def get_video_labels(job_id):
         yield response
 
 
-def put_labels_in_db(response, bucket_name, object_name):
+def float_to_str(data):
+    """Convert float to string."""
+    if isinstance(data, dict):
+        for key, val in data.items():
+            data[key] = float_to_str(val)
+        return data
+
+    if isinstance(data, list):
+        for index, val in enumerate(data):
+            data[index] = float_to_str(val)
+        return data
+
+    if isinstance(data, float):
+        return str(data)
+
+    return data
+
+
+def put_labels_in_db(data, bucket_name, object_name):
     """Store Labels and metadata in dynamodb."""
-    print(f'put_labels_int_db : {bucket_name} : {object_name}')
-    print(response)
+    data.pop('JobStatus', None)
+    data.pop('StatusMessage', None)
+    data.pop('NextToken', None)
+    data.pop('ResponseMetadata')
+
+    data['VideoName'] = object_name
+    data['VideoBucket'] = bucket_name
+    table_name = os.environ['DYNAMODB_TABLE_NAME']
+    try:
+        videos_table = get_dynamodb_resource().Table(table_name)
+        data = float_to_str(data)
+        data = videos_table.put_item(Item=data)
+    except ClientError as client_error:
+        raise VideoLabelsException(None, str(client_error))
 
 
 def handle_label_detection(event, context):

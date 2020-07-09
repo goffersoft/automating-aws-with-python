@@ -213,10 +213,10 @@ resources:
       Properties:
         TableName: ${self:custom.videos-db-table-name}
         AttributeDefinitions:
-          - AttributeName: videoName
+          - AttributeName: VideoName
             AttributeType: S
         KeySchema:
-          - AttributeName: videoName
+          - AttributeName: VideoName
             KeyType: HASH 
         ProvisionedThroughput:
           ReadCapacityUnits: 1

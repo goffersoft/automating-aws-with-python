@@ -2,7 +2,7 @@
 
 #### Send AWS CloudWatch Notifications to Slack 
 
-###  For This to work - the following will need to be in place.
+#####  For This to work - the following will need to be in place.
 ```
 1) Setup an Auto Scaling group
     a) Quick and Dirty approach

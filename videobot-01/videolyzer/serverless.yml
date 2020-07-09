@@ -47,7 +47,17 @@ provider:
         Fn::GetAtt:
           - RekognitionSNSPublishRole
           - Arn 
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+      Resource:
+        Fn::GetAtt:
+          - VideosDbTable
+          - Arn
+      
   environment:
+    DYNAMODB_TABLE_NAME: ${self:custom.videos-db-table-name}
+    DYNAMODB_PUT_THRESHOLD: ${self:custom.dynamodb-put-threshold}
     REKOGNITION_SNS_TOPIC_ARN: ${self:custom.rekognition-sns-topic-arn}
     REKOGNITION_SNS_ROLE_ARN:
       Fn::GetAtt:
@@ -55,6 +65,8 @@ provider:
         - Arn
 
 custom:
+  dynamodb-put-threshold: ${file(../config/config.${self:provider.stage}.json):videolyzer.dynamodb_put_threshold}
+  videos-db-table-name: ${file(../config/config.${self:provider.stage}.json):videolyzer.videos_dynamodb_table}
   rekognition-sns-topic-arn:
     Fn::Join:
       - ':'
@@ -196,4 +208,16 @@ resources:
                   Action:
                     - sns:Publish
                   Resource: ${self:custom.rekognition-sns-topic-arn}
-
+    VideosDbTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.videos-db-table-name}
+        AttributeDefinitions:
+          - AttributeName: videoName
+            AttributeType: S
+        KeySchema:
+          - AttributeName: videoName
+            KeyType: HASH 
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

@@ -3,6 +3,7 @@
         "aws_profile_name": "<aws-profile-name>",
         "aws_region_name": "<aws-region-name>",
         "videos_s3_bucket_name": "<videos-s3-bucket-name>",
-        "videos_dynamo_db_table": "<videos-dynamo-db-table>"
+        "videos_dynamodb_table": "<dynamodb-table-name>",
+        "dynamodb_put_threshold": "<threashold-value-as-int>"
     }
 }

@@ -146,8 +146,8 @@ def float_to_str(data):
     return data
 
 
-def put_labels_in_db(data, bucket_name, object_name):
-    """Store Labels and metadata in dynamodb."""
+def add_labels(videos_table, bucket_name, object_name, data):
+    """Add Labels to Dynamodb table."""
     data.pop('JobStatus', None)
     data.pop('StatusMessage', None)
     data.pop('NextToken', None)
@@ -155,11 +155,41 @@ def put_labels_in_db(data, bucket_name, object_name):
 
     data['VideoName'] = object_name
     data['VideoBucket'] = bucket_name
-    table_name = os.environ['DYNAMODB_TABLE_NAME']
+
+    data = float_to_str(data)
+
+    videos_table.put_item(Item=data)
+
+
+def update_labels(videos_table, object_name, data):
+    """Update Labels In Dynamodb table."""
+    data = data.get('Labels', None)
+    if not data:
+        print('No Labels data found : nothing to update')
+        return
+
+    data.pop('Timestamp', None)
+    data = float_to_str(data)
+
+    videos_table.update_item(
+        Key={
+            'VideoName': object_name
+        },
+        UpdateExpression='SET Labels = list_append(Labels, :labels)',
+        ExpressionAttributeValues={
+            ':labels': data
+        })
+
+
+def put_labels_in_db(data, bucket_name, object_name, add_update_flag):
+    """Store Labels and metadata in dynamodb."""
     try:
+        table_name = os.environ['DYNAMODB_TABLE_NAME']
         videos_table = get_dynamodb_resource().Table(table_name)
-        data = float_to_str(data)
-        data = videos_table.put_item(Item=data)
+        if add_update_flag:
+            add_labels(videos_table, bucket_name, object_name, data)
+        else:
+            update_labels(videos_table, object_name, data)
     except ClientError as client_error:
         raise VideoLabelsException(None, str(client_error))
 
@@ -182,15 +212,19 @@ def handle_label_detection(event, context):
 
         msg_str = 'Video Analysis Succeeded'
         if status == 'SUCCEEDED':
+            add_update_flag = True
             try:
                 for response in \
                         get_video_labels(job_id):
-                    put_labels_in_db(response, bucket_name, object_name)
+                    put_labels_in_db(response, bucket_name,
+                                     object_name, add_update_flag)
+                    add_update_flag = False
             except VideoLabelsException as label_error:
                 response = label_error.get_response()
                 msg_str = str(label_error)
                 if response:
-                    put_labels_in_db(response, bucket_name, object_name)
+                    put_labels_in_db(response, bucket_name,
+                                     object_name, add_update_flag)
         else:
             msg_str = f'Video Analysis Failed : status={status}'
 

@@ -21,3 +21,25 @@ for entry in response['Labels']:
 
 data['Records'][0]['s3']['bucket']['name']
 data['Records'][0]['s3']['object']['key']
+
+rekogc = session.client('rekognition')
+        
+for record in event['Records']:
+        sns_topic_arn = record['Sns']['TopicArn']
+        msg = json.loads(record['Sns']['Message'])
+        job_id = msg['JobId']
+        status = msg['Status']
+        api_name = msg['API']
+        timestamp = msg['Timestamp']
+        s3_bucket_name = msg['Video']['S3Bucket']
+        s3_object_name = msg['Video']['S3ObjectName']
+        response = rekogc.\
+            get_label_detection(JobId=job_id)
+        print(sns_topic_arn)
+        print(job_id)
+        print(status)
+        print(api_name)
+        print(timestamp)
+        print(s3_bucket_name)
+        print(s3_object_name)
+        #print(response)
